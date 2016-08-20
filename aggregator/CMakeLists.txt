@@ -4,7 +4,7 @@ cmake_minimum_required (VERSION 2.6)
 project (aggregator)
 
 set(SUPPRESSED_WARNING "-Wno-conversion-null -Wno-write-strings")
-set(LIBRARIES boost_system boost_thread boost_log boost_log_setup boost_locale pthread)
+set(LIBRARIES boost_system boost_thread boost_log boost_log_setup boost_locale boost_program_options pthread)
 
 # Compiling flags
 set(CMAKE_CXX_FLAGS "-g")

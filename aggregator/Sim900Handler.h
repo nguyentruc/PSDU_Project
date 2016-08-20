@@ -20,7 +20,7 @@ class Aggregator;
 class Sim900Handler
 {
 public:
-	Sim900Handler(Aggregator* aAggregator, const char *aDevice);
+	Sim900Handler(Aggregator* aAggregator, const char *aDevice, int aBaudrate);
 	virtual ~Sim900Handler();
 
 	void start();
@@ -39,11 +39,12 @@ private:
 
 	void uartTest();
 	void sim900Init();
-	void uartSetup(const char *aDevice);
+	void uartSetup(const char *aDevice, int aBaudrate);
 	void sim900Hdl();
 	void sim900Monitor();
 	string sim900Get();
 	int waitForOk();
+	int uartBaudrate(int aBaudrate);
 };
 
 #endif /* AGGREGATOR_SIM900HANDLER_H_ */

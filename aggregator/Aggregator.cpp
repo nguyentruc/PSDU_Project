@@ -9,7 +9,8 @@
 
 Aggregator::Aggregator()
 {
-	mSim900Hdl = new Sim900Handler(this, "/dev/ttyUSB0");
+	mSim900Hdl = new Sim900Handler(this, gPROG_ARGUMENT["serialDevice"].as<string>().c_str(),
+			gPROG_ARGUMENT["baudrate"].as<int>());
 }
 
 void Aggregator::start()

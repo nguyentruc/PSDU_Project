@@ -8,7 +8,8 @@
 #ifndef AGGREGATOR_POWERHANDLER_H_
 #define AGGREGATOR_POWERHANDLER_H_
 
-class PowerHandler {
+class PowerHandler
+{
 public:
 	PowerHandler();
 	virtual ~PowerHandler();

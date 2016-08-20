@@ -7,10 +7,12 @@
 
 #include "Sim900Handler.h"
 
-Sim900Handler::Sim900Handler(Aggregator* aAggregator, const char *aDevice)
+Sim900Handler::Sim900Handler(Aggregator* aAggregator, const char *aDevice, int aBaudrate)
 {
 	mAggregator = aAggregator;
-	uartSetup(aDevice);
+	cout << "Serial port: " << aDevice << endl;
+	cout << "Baudrate = " << aBaudrate << endl;
+	uartSetup(aDevice, aBaudrate);
 }
 
 Sim900Handler::~Sim900Handler()
@@ -23,7 +25,7 @@ Sim900Handler::~Sim900Handler()
  * @param[in]:
  * 	const char *aDevice: device file of serial port
  */
-void Sim900Handler::uartSetup(const char *aDevice)
+void Sim900Handler::uartSetup(const char *aDevice, int aBaudrate)
 {
 	//At bootup, pins 8 and 10 are already set to UART0_TXD, UART0_RXD (ie the alt0 function) respectively
 	mUartFd = -1;
@@ -58,12 +60,13 @@ void Sim900Handler::uartSetup(const char *aDevice)
 	//	PARODD - Odd parity (else even)
 	struct termios options;
 	tcgetattr(mUartFd, &options);
-	options.c_cflag = B9600 | CS8 | CLOCAL | CREAD;		//<Set baud rate
+	options.c_cflag = uartBaudrate(aBaudrate) | CS8 | CLOCAL | CREAD;		//<Set baud rate
 	options.c_iflag = 0;
 	options.c_oflag = 0;
 	options.c_lflag = 0;
 	tcsetattr(mUartFd, TCSANOW, &options);
 
+	//TODO: Flush input buffer before starting
 	sleep(2);
 	tcflush(mUartFd, TCIFLUSH);
 }
@@ -159,6 +162,8 @@ void Sim900Handler::sim900Init()
 {
 	printf("Initializing Sim900...\n");
 	sleep(1); //delay 1s
+
+	mRcvMsgBuf.clear();// This is temporary, flushing in OS is a better practice
 
 	dprintf(mUartFd, "ATE0\r");
 	if (waitForOk() < 0)
@@ -272,3 +277,18 @@ int Sim900Handler::waitForOk()
 	return 0;
 }
 
+int Sim900Handler::uartBaudrate(int aBaudrate)
+{
+	switch (aBaudrate)
+	{
+	case 9600:
+		return B9600;
+	case 38400:
+		return B38400;
+	case 115200:
+		return B115200;
+	default:
+		cout << "ERROR: Baudrate " << aBaudrate << " is not supported";
+	}
+	return -1;
+}

@@ -20,7 +20,10 @@
 class Client;
 class Sim900Handler;
 
-class Aggregator {
+extern po::variables_map gPROG_ARGUMENT;
+
+class Aggregator
+{
 public:
 	Aggregator();
 	virtual ~Aggregator();
