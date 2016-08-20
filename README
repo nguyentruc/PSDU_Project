@@ -1,0 +1,8 @@
+Usage: (Required cmake)
+  $ mkdir build
+  $ cd build
+  $ cmake ..
+  $ make aggregator
+
+Create virtual serial port:
+  sudo socat PTY,link=/dev/ttyS10 PTY,link=/dev/ttyS11
