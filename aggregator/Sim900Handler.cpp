@@ -73,16 +73,12 @@ void Sim900Handler::uartSetup(const char *aDevice, int aBaudrate)
 
 void Sim900Handler::start()
 {
-	/* Wait for incoming bytes from serial port */
-	mMonitorThread = boost::thread(&Sim900Handler::sim900Monitor, this);
-
-	/* Handle received message */
+	/* Handle Sim900 */
 	mHandleThead = boost::thread(&Sim900Handler::sim900Hdl, this);
 }
 
 void Sim900Handler::waitForDone()
 {
-	mMonitorThread.join();
 	mHandleThead.join();
 }
 
@@ -163,8 +159,6 @@ void Sim900Handler::sim900Init()
 	printf("Initializing Sim900...\n");
 	sleep(1); //delay 1s
 
-	mRcvMsgBuf.clear();// This is temporary, flushing in OS is a better practice
-
 	dprintf(mUartFd, "ATE0\r");
 	if (waitForOk() < 0)
 	{
@@ -200,10 +194,10 @@ void Sim900Handler::sim900Init()
 }
 
 /**
- * Read 1 byte until receiving \r\n
- * Store received data in buffer
+ * Wait until a message available then get one
+ * @Return:	The received messsage
  */
-void Sim900Handler::sim900Monitor()
+string Sim900Handler::sim900Get()
 {
 	char rcvBuf[256];
 	uint8_t rcvIndex = 0;
@@ -214,7 +208,7 @@ void Sim900Handler::sim900Monitor()
 		if (length <= 0)
 		{
 			printf("Error, length = %d at %s:%d", length, __FILE__, __LINE__);
-			return;
+			return string("ERROR");
 		}
 
 		if (rcvIndex > 0)
@@ -222,39 +216,14 @@ void Sim900Handler::sim900Monitor()
 			/* Received \r\n */
 			if (rcvBuf[rcvIndex - 1] == '\r' && rcvBuf[rcvIndex] == '\n')
 			{
-				string msg(rcvBuf, rcvIndex - 1);
-				rcvIndex = 0;
-
-				boost::unique_lock<boost::mutex> guard(mMtx_RcvMsgBuf);
-				mRcvMsgBuf.push_back(msg);
-				mCv_RcvMsgBuf.notify_all();
+				string rcvMsg(rcvBuf, rcvIndex - 1);
+				cout << "Received: " << rcvMsg << endl;
+				return rcvMsg;
 			}
 			else rcvIndex++;
 		}
 		else rcvIndex++;
 	}
-}
-
-/**
- * Wait until a message available then get one
- * @Return:	The received messsage
- */
-string Sim900Handler::sim900Get()
-{
-	boost::unique_lock<boost::mutex> guard(mMtx_RcvMsgBuf);
-
-	while (mRcvMsgBuf.empty() == true)
-	{
-		mCv_RcvMsgBuf.wait(guard);
-	}
-	string rcvMsg = mRcvMsgBuf.front();
-	mRcvMsgBuf.pop_front();
-
-	guard.unlock();
-
-	cout << "Received: " << rcvMsg << endl;
-
-	return rcvMsg;
 }
 
 /**

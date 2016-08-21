@@ -27,13 +27,8 @@ public:
 	void waitForDone();
 
 private:
-	boost::thread mMonitorThread;
 	boost::thread mHandleThead;
 	Aggregator *mAggregator;
-
-	boost::mutex mMtx_RcvMsgBuf;
-	boost::condition_variable mCv_RcvMsgBuf;
-	list<string> mRcvMsgBuf; //Buffer of received messages
 
 	int mUartFd;
 
@@ -41,7 +36,6 @@ private:
 	void sim900Init();
 	void uartSetup(const char *aDevice, int aBaudrate);
 	void sim900Hdl();
-	void sim900Monitor();
 	string sim900Get();
 	int waitForOk();
 	int uartBaudrate(int aBaudrate);
