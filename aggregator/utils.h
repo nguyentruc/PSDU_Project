@@ -18,6 +18,8 @@
 #include <string>
 #include <stdint.h>
 #include <sys/time.h>
+#include <pthread.h>
+#include <sched.h>
 
 #include <boost/thread.hpp>
 #include <boost/program_options.hpp>

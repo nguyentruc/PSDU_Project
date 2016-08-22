@@ -26,6 +26,7 @@ set ( aggregator_SRCS
     Sim900Handler.cpp
     Client.cpp
     utils.cpp
+    sms_pdu.cpp
 )
 add_executable(aggregator ${aggregator_SRCS})
 target_link_libraries(aggregator ${LIBRARIES})

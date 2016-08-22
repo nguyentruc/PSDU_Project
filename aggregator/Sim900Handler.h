@@ -13,6 +13,11 @@
 #include <fcntl.h>			//Used for UART
 #include <termios.h>		//Used for UART
 
+//extern "C"
+//{
+#include "sms_pdu.h"
+//}
+
 using namespace std;
 
 class Aggregator;

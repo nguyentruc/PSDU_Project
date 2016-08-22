@@ -99,14 +99,16 @@ void Sim900Handler::sim900Hdl()
 			if (rcvMsg.find("+CMT:") != string::npos) // receive sms header
 			{
 				state = 1;
-				int firstQuote = rcvMsg.find('\"');
-				int secondQuote = rcvMsg.find('\"', firstQuote + 1);
-				phoneNum = rcvMsg.substr(firstQuote + 1, secondQuote - firstQuote - 1);
+//				int firstQuote = rcvMsg.find('\"');
+//				int secondQuote = rcvMsg.find('\"', firstQuote + 1);
+//				phoneNum = rcvMsg.substr(firstQuote + 1, secondQuote - firstQuote - 1);
 			}
 			break;
 		case 1: // get sms body
-			cout << "From phone number: " << phoneNum << endl;
-			cout << "Received sms: " << rcvMsg << endl;
+			sms_t sms;
+			sms_decode_pdu(rcvMsg.c_str(), rcvMsg.length(), &sms);
+			cout << "From phone: " << string(sms.telnum, sms.telnum_length) << endl;
+			cout << "Message: " << string((char*)sms.message, sms.message_length) << endl;
 			state = 0;
 			break;
 		}
@@ -165,7 +167,7 @@ void Sim900Handler::sim900Init()
 		cout << "Error at " << __FILE__ << ":" << __LINE__ << endl;
 	}
 
-	dprintf(mUartFd, "AT+CMGF=1\r");
+	dprintf(mUartFd, "AT+CMGF=0\r");
 	if (waitForOk() < 0)
 	{
 		cout << "Error at " << __FILE__ << ":" << __LINE__ << endl;
@@ -256,6 +258,10 @@ int Sim900Handler::uartBaudrate(int aBaudrate)
 		return B38400;
 	case 115200:
 		return B115200;
+	case 460800:
+		return B460800;
+	case 921600:
+		return B921600;
 	default:
 		cout << "ERROR: Baudrate " << aBaudrate << " is not supported";
 	}
