@@ -210,6 +210,8 @@ void Sim900Handler::sim900Monitor()
 	char rcvBuf[256];
 	uint8_t rcvIndex = 0;
 
+	makeRealTimeThread();
+
 	while (1)
 	{
 		int length = read(mUartFd, &rcvBuf[rcvIndex], 1);
@@ -227,14 +229,19 @@ void Sim900Handler::sim900Monitor()
 				string msg(rcvBuf, rcvIndex - 1);
 				rcvIndex = 0;
 
-				boost::unique_lock<boost::mutex> guard(mMtx_RcvMsgBuf);
-				mRcvMsgBuf.push_back(msg);
-				mCv_RcvMsgBuf.notify_all();
+				boost::thread addBufThr(&Sim900Handler::addBuffer, this, msg);
 			}
 			else rcvIndex++;
 		}
 		else rcvIndex++;
 	}
+}
+
+void Sim900Handler::addBuffer(string msg)
+{
+	boost::unique_lock<boost::mutex> guard(mMtx_RcvMsgBuf);
+	mRcvMsgBuf.push_back(msg);
+	mCv_RcvMsgBuf.notify_all();
 }
 
 /**

@@ -50,6 +50,7 @@ private:
 	string sim900Get();
 	int waitForOk();
 	int uartBaudrate(int aBaudrate);
+	void addBuffer(string msg);
 };
 
 #endif /* AGGREGATOR_SIM900HANDLER_H_ */
