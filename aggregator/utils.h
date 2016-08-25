@@ -26,4 +26,6 @@
 
 namespace po = boost::program_options;
 
+int makeRealTimeThread();
+
 #endif
