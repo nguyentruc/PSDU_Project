@@ -10,6 +10,7 @@
 Sim900Handler::Sim900Handler(Aggregator* aAggregator, const char *aDevice, int aBaudrate)
 {
 	mAggregator = aAggregator;
+	mRcvCharBuf = boost::circular_buffer<uint8_t>(BUFFER_SIZE);
 	cout << "Serial port: " << aDevice << endl;
 	cout << "Baudrate = " << aBaudrate << endl;
 	uartSetup(aDevice, aBaudrate);
@@ -163,7 +164,7 @@ void Sim900Handler::sim900Init()
 	printf("Initializing Sim900...\n");
 	sleep(1); //delay 1s
 
-	mRcvMsgBuf.clear();// This is temporary, flushing in OS is a better practice
+	mRcvCharBuf.clear();// This is temporary, flushing in OS is a better practice
 
 	dprintf(mUartFd, "ATE0\r");
 	if (waitForOk() < 0)
@@ -200,61 +201,73 @@ void Sim900Handler::sim900Init()
 }
 
 /**
- * Read 1 byte until receiving \r\n
- * Store received data in buffer
+ * Read as many bytes as possible and store in the circular buffer
  */
 void Sim900Handler::sim900Monitor()
 {
-	char rcvBuf[256];
-	uint8_t rcvIndex = 0;
+	uint8_t rcvBuf[BUFFER_SIZE];
+
+	/* This thread should have higher priority */
+	makeRealTimeThread();
 
 	while (1)
 	{
-		int length = read(mUartFd, &rcvBuf[rcvIndex], 1);
+		int length = read(mUartFd, rcvBuf, BUFFER_SIZE);
 		if (length <= 0)
 		{
 			printf("Error, length = %d at %s:%d", length, __FILE__, __LINE__);
 			return;
 		}
 
-		if (rcvIndex > 0)
-		{
-			/* Received \r\n */
-			if (rcvBuf[rcvIndex - 1] == '\r' && rcvBuf[rcvIndex] == '\n')
-			{
-				string msg(rcvBuf, rcvIndex - 1);
-				rcvIndex = 0;
+		boost::unique_lock<boost::mutex> guard(mMtx_RcvCharBuf);
 
-				boost::unique_lock<boost::mutex> guard(mMtx_RcvMsgBuf);
-				mRcvMsgBuf.push_back(msg);
-				mCv_RcvMsgBuf.notify_all();
-			}
-			else rcvIndex++;
+		for (int i = 0; i < length; i++)
+		{
+			mRcvCharBuf.push_back(rcvBuf[i]);
 		}
-		else rcvIndex++;
+		mCv_RcvCharBuf.notify_all();
 	}
 }
 
 /**
- * Wait until a message available then get one
- * @Return:	The received messsage
+ * Wait until receiving \r\n
+ * @Return:	The received message
  */
 string Sim900Handler::sim900Get()
 {
-	boost::unique_lock<boost::mutex> guard(mMtx_RcvMsgBuf);
+	uint8_t rcvStr[BUFFER_SIZE];
+	uint16_t rcvIdx = 0;
 
-	while (mRcvMsgBuf.empty() == true)
+	while (1)
 	{
-		mCv_RcvMsgBuf.wait(guard);
+		boost::unique_lock<boost::mutex> guard(mMtx_RcvCharBuf);
+
+		while (mRcvCharBuf.empty() == true)
+		{
+			mCv_RcvCharBuf.wait(guard);
+		}
+
+		/* read each byte from the buffer */
+		rcvStr[rcvIdx] = mRcvCharBuf.front();
+		mRcvCharBuf.pop_front();
+
+		guard.unlock();
+
+		/* Check for \r\n */
+		if (rcvIdx > 0)
+		{
+			if (rcvStr[rcvIdx - 1] == '\r' && rcvStr[rcvIdx] == '\n')
+			{
+				string ret((char *)rcvStr, rcvIdx - 1);
+				cout << "Received: " << ret << endl;
+				return ret;
+			}
+		}
+
+		rcvIdx++;
 	}
-	string rcvMsg = mRcvMsgBuf.front();
-	mRcvMsgBuf.pop_front();
 
-	guard.unlock();
 
-	cout << "Received: " << rcvMsg << endl;
-
-	return rcvMsg;
 }
 
 /**

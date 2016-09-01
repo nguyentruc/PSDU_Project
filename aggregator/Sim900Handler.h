@@ -12,6 +12,7 @@
 #include <unistd.h>			//Used for UART
 #include <fcntl.h>			//Used for UART
 #include <termios.h>		//Used for UART
+#include <boost/circular_buffer.hpp>
 
 using namespace std;
 
@@ -27,13 +28,15 @@ public:
 	void waitForDone();
 
 private:
+	static const int BUFFER_SIZE = 1024;
+
 	boost::thread mMonitorThread;
 	boost::thread mHandleThead;
 	Aggregator *mAggregator;
 
-	boost::mutex mMtx_RcvMsgBuf;
-	boost::condition_variable mCv_RcvMsgBuf;
-	list<string> mRcvMsgBuf; //Buffer of received messages
+	boost::mutex mMtx_RcvCharBuf;
+	boost::condition_variable mCv_RcvCharBuf;
+	boost::circular_buffer<uint8_t> mRcvCharBuf; //Buffer of received character
 
 	int mUartFd;
 
