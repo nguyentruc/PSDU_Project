@@ -22,6 +22,10 @@ class Sim900Handler;
 
 extern po::variables_map gPROG_ARGUMENT;
 
+using namespace std;
+
+const int POWER_STATUS = 0;
+
 class Aggregator
 {
 public:
@@ -29,9 +33,22 @@ public:
 	virtual ~Aggregator();
 
 	void start();
+	void addSubscriber(int aStatusId, const string& aPhoneNum);
+	bool compareAdminPwd(const string& anAdminPwd);
+	bool compareSubscriberPwd(const string& aSubscriberPwd);
 
 private:
 	Sim900Handler *mSim900Hdl;
+
+	// Status id -> list of Client
+	map<int, list<string> > mSubscriberList;
+	boost::mutex mMtx_SubscriberList;
+
+	string mAdminPwd;
+	boost::mutex mMtx_AdminPwd;
+
+	string mSubscriberPwd;
+	boost::mutex mMtx_SubscriberPwd;
 };
 
 #endif /* AGGREGATOR_AGGREGATOR_H_ */

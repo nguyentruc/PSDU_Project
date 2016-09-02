@@ -112,6 +112,10 @@ void Sim900Handler::sim900Hdl()
 		case 1: // get sms body
 			cout << "From phone number: " << phoneNum << endl;
 			cout << "Received sms: " << rcvMsg << endl;
+
+			ClientSim900 *client = new ClientSim900(mAggregator, rcvMsg, phoneNum);
+			client->start();
+
 			state = 0;
 			break;
 		}

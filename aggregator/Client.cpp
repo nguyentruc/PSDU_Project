@@ -9,34 +9,100 @@
 
 Client::Client()
 {
-	// TODO Auto-generated constructor stub
-
+	mAggregator = NULL;
 }
 
 Client::~Client()
 {
-	// TODO Auto-generated destructor stub
+
 }
 
 void Client::start()
 {
-	boost::thread a(&Client::clientHdl, this);
-	a.join();
+	boost::thread ClntThread(&Client::clientHandler, this);
 }
 
-void Client::waitForDone()
+int Client::subscribe(const string& aStatus, const string& aPhoneNum)
+{
+	if (aStatus == "Power")
+	{
+		mAggregator->addSubscriber(POWER_STATUS, aPhoneNum);
+	}
+	else
+	{
+		return -1;
+	}
+
+	return 0;
+}
+
+int Client::unSubscribe(const string& aStatus, const string& aPhoneNum)
 {
 }
 
-void Client::subscribe()
+ClientSim900::ClientSim900(Aggregator *anAggregator, const string& aMessage, const string& aPhoneNum)
+{
+	mAggregator = anAggregator;
+	mMessage = aMessage;
+	mPhoneNum = aPhoneNum;
+}
+
+ClientSim900::~ClientSim900()
 {
 }
 
-void Client::unSubscribe()
+void ClientSim900::clientHandler()
 {
+	pthread_setname_np(pthread_self(), "Sim900");
+	cout << "Sim900 Handler\n";
+
+	//TODO: Handle subscribers
+
+	delete this;
 }
 
-void ClientSim900::clientHdl()
+int Client::receivedCmdHandler(const char* aRcvMsg, int aRcvMsgSize)
 {
-	printf("ClientSim900\n");
+	Json::Reader reader;
+	Json::Value root;
+
+	if (reader.parse(aRcvMsg, aRcvMsg + aRcvMsgSize, root) == 0)
+	{
+		cout << "Error: Parse JSON failed" << endl;
+		return -1;
+	}
+
+	if (root["action"] == "AddSubscriber")
+	{
+		addSubscriberHdl(root);
+	}
+
+	return 0;
+}
+
+void Client::addSubscriberHdl(Json::Value &aRoot)
+{
+	Json::Value response;
+
+	response["result"] = "SUCCESS";
+	response["desc"] = "Added";
+
+	if (aRoot.isMember("status") == false || aRoot.isMember("phone") == false)
+	{
+		response["result"] = "FAILED";
+		response["desc"] = "Parameter missing";
+	}
+	else if (subscribe(aRoot["status"].asString(), aRoot["phone"].asString()) < 0)
+	{
+		response["result"] = "FAILED";
+		response["desc"] = string(aRoot["status"].asString() + " is not supported");
+	}
+
+	Json::FastWriter writer;
+	string outMsg = writer.write(response);
+
+	cout << "outMsg = " << outMsg << endl;
+	cout << "outMsg's size = " << outMsg.size() << endl;
+
+	//TODO: send to Client
 }
