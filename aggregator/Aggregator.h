@@ -13,12 +13,14 @@
 #include "utils.h"
 #include "Sim900Handler.h"
 #include "Client.h"
+#include "PowerHandler.h"
 
 #include <list>
 #include <map>
 
 class Client;
 class Sim900Handler;
+class PowerHandler;
 
 extern po::variables_map gPROG_ARGUMENT;
 
@@ -36,9 +38,11 @@ public:
 	void addSubscriber(int aStatusId, const string& aPhoneNum);
 	bool compareAdminPwd(const string& anAdminPwd);
 	bool compareSubscriberPwd(const string& aSubscriberPwd);
+	void notifySubscribers(int aStatusId, bool aValue);
 
 private:
 	Sim900Handler *mSim900Hdl;
+	PowerHandler *mPowerHdl;
 
 	// Status id -> list of Client
 	map<int, list<string> > mSubscriberList;
@@ -49,6 +53,8 @@ private:
 
 	string mSubscriberPwd;
 	boost::mutex mMtx_SubscriberPwd;
+
+	list<string> getSubscriberList(int aStatusId);
 };
 
 #endif /* AGGREGATOR_AGGREGATOR_H_ */

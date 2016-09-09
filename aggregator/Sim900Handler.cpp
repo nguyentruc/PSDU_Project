@@ -75,18 +75,11 @@ void Sim900Handler::uartSetup(const char *aDevice, int aBaudrate)
 void Sim900Handler::start()
 {
 	/* Wait for incoming bytes from serial port */
-	mMonitorThread = boost::thread(&Sim900Handler::sim900Monitor, this);
+	boost::thread(&Sim900Handler::sim900Monitor, this);
 
 	/* Handle received message */
-	mHandleThead = boost::thread(&Sim900Handler::sim900Hdl, this);
+	boost::thread(&Sim900Handler::sim900Hdl, this);
 }
-
-void Sim900Handler::waitForDone()
-{
-	mMonitorThread.join();
-	mHandleThead.join();
-}
-
 
 void Sim900Handler::sim900Hdl()
 {
@@ -308,4 +301,18 @@ int Sim900Handler::uartBaudrate(int aBaudrate)
 		cout << "ERROR: Baudrate " << aBaudrate << " is not supported";
 	}
 	return -1;
+}
+
+int Sim900Handler::sendSms(const string &aPhoneNum, const string &aMsg)
+{
+    char sendMsg[50];
+
+    dprintf(mUartFd, "AT+CMGS=\"%s\"\r", aPhoneNum.c_str());
+    sleep(1);
+
+    dprintf(mUartFd, "%s", aMsg.c_str());
+    sleep(1);
+
+    dprintf(mUartFd, "%c", 0x1A);
+	return 0;
 }

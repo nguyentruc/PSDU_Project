@@ -25,13 +25,11 @@ public:
 	virtual ~Sim900Handler();
 
 	void start();
-	void waitForDone();
+	int sendSms(const string &aPhoneNum, const string &aMsg);
 
 private:
 	static const int BUFFER_SIZE = 1024;
 
-	boost::thread mMonitorThread;
-	boost::thread mHandleThead;
 	Aggregator *mAggregator;
 
 	boost::mutex mMtx_RcvCharBuf;
