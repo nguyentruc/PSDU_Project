@@ -1,12 +1,12 @@
 /*
- * Sim900Handler.h
+ * GSM.h
  *
  *  Created on: Aug 18, 2016
  *      Author: trucndt
  */
 
-#ifndef AGGREGATOR_SIM900HANDLER_H_
-#define AGGREGATOR_SIM900HANDLER_H_
+#ifndef AGGREGATOR_GSM_H_
+#define AGGREGATOR_GSM_H_
 
 #include "Aggregator.h"
 #include <unistd.h>			//Used for UART
@@ -18,11 +18,11 @@ using namespace std;
 
 class Aggregator;
 
-class Sim900Handler
+class GSM
 {
 public:
-	Sim900Handler(Aggregator* aAggregator, const char *aDevice, int aBaudrate);
-	virtual ~Sim900Handler();
+	GSM(Aggregator* aAggregator, const char *aDevice, int aBaudrate);
+	virtual ~GSM();
 
 	void start();
 	int sendSms(const string &aPhoneNum, const string &aMsg);
@@ -39,13 +39,13 @@ private:
 	int mUartFd;
 
 	void uartTest();
-	void sim900Init();
+	void GSMInit();
 	void uartSetup(const char *aDevice, int aBaudrate);
-	void sim900Hdl();
-	void sim900Monitor();
-	string sim900Get();
+	void GSMHandler();
+	void GSMMonitor();
+	string GSMGet();
 	int waitForOk();
 	int uartBaudrate(int aBaudrate);
 };
 
-#endif /* AGGREGATOR_SIM900HANDLER_H_ */
+#endif /* AGGREGATOR_GSM_H_ */

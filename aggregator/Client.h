@@ -33,11 +33,11 @@ protected:
 	virtual void clientHandler() {};
 };
 
-class ClientSim900: public Client
+class ClientGSM: public Client
 {
 public:
-	ClientSim900(Aggregator *anAggregator, const string& aMessage, const string& aPhoneNum);
-	~ClientSim900();
+	ClientGSM(Aggregator *anAggregator, const string& aMessage, const string& aPhoneNum);
+	~ClientGSM();
 
 private:
 	string mMessage;

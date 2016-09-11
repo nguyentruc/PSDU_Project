@@ -11,15 +11,15 @@
 #include <stdio.h>
 #include <iostream>
 #include "utils.h"
-#include "Sim900Handler.h"
 #include "Client.h"
 #include "PowerHandler.h"
 
 #include <list>
 #include <map>
+#include "GSM.h"
 
 class Client;
-class Sim900Handler;
+class GSM;
 class PowerHandler;
 
 extern po::variables_map gPROG_ARGUMENT;
@@ -41,7 +41,7 @@ public:
 	void notifySubscribers(int aStatusId, bool aValue);
 
 private:
-	Sim900Handler *mSim900Hdl;
+	GSM *mGSMHdl;
 	PowerHandler *mPowerHdl;
 
 	// Status id -> list of Client

@@ -9,14 +9,14 @@
 
 Aggregator::Aggregator()
 {
-	mSim900Hdl = new Sim900Handler(this, gPROG_ARGUMENT["serialDevice"].as<string>().c_str(),
+	mGSMHdl = new GSM(this, gPROG_ARGUMENT["serialDevice"].as<string>().c_str(),
 			gPROG_ARGUMENT["baudrate"].as<int>());
 	mPowerHdl = new PowerHandler(this);
 }
 
 void Aggregator::start()
 {
-	mSim900Hdl->start();
+	mGSMHdl->start();
 	mPowerHdl->start();
 
 	for (;;)
@@ -27,7 +27,7 @@ void Aggregator::start()
 
 Aggregator::~Aggregator()
 {
-	delete mSim900Hdl;
+	delete mGSMHdl;
 }
 
 void Aggregator::addSubscriber(int aStatusId, const string& aPhoneNum)
@@ -79,7 +79,7 @@ void Aggregator::notifySubscribers(int aStatusId, bool aValue)
 
 	for (list<string>::const_iterator it = subscriberList.begin(); it != subscriberList.end(); ++it)
 	{
-		mSim900Hdl->sendSms(*it, outMsg);
+		mGSMHdl->sendSms(*it, outMsg);
 	}
 }
 

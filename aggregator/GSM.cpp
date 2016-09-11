@@ -1,13 +1,13 @@
 /*
- * Sim900Handler.cpp
+ * GSM.cpp
  *
  *  Created on: Aug 18, 2016
  *      Author: trucndt
  */
 
-#include "Sim900Handler.h"
+#include "GSM.h"
 
-Sim900Handler::Sim900Handler(Aggregator* aAggregator, const char *aDevice, int aBaudrate)
+GSM::GSM(Aggregator* aAggregator, const char *aDevice, int aBaudrate)
 {
 	mAggregator = aAggregator;
 	mRcvCharBuf = boost::circular_buffer<uint8_t>(BUFFER_SIZE);
@@ -16,7 +16,7 @@ Sim900Handler::Sim900Handler(Aggregator* aAggregator, const char *aDevice, int a
 	uartSetup(aDevice, aBaudrate);
 }
 
-Sim900Handler::~Sim900Handler()
+GSM::~GSM()
 {
 	close(mUartFd);
 }
@@ -26,7 +26,7 @@ Sim900Handler::~Sim900Handler()
  * @param[in]:
  * 	const char *aDevice: device file of serial port
  */
-void Sim900Handler::uartSetup(const char *aDevice, int aBaudrate)
+void GSM::uartSetup(const char *aDevice, int aBaudrate)
 {
 	//At bootup, pins 8 and 10 are already set to UART0_TXD, UART0_RXD (ie the alt0 function) respectively
 	mUartFd = -1;
@@ -72,24 +72,24 @@ void Sim900Handler::uartSetup(const char *aDevice, int aBaudrate)
 	tcflush(mUartFd, TCIFLUSH);
 }
 
-void Sim900Handler::start()
+void GSM::start()
 {
 	/* Wait for incoming bytes from serial port */
-	boost::thread(&Sim900Handler::sim900Monitor, this);
+	boost::thread(&GSM::GSMMonitor, this);
 
 	/* Handle received message */
-	boost::thread(&Sim900Handler::sim900Hdl, this);
+	boost::thread(&GSM::GSMHandler, this);
 }
 
-void Sim900Handler::sim900Hdl()
+void GSM::GSMHandler()
 {
-	sim900Init();
+	GSMInit();
 
 	uint8_t state = 0;
 	string phoneNum, rcvMsg;
 	while (true)
 	{
-		rcvMsg = sim900Get();
+		rcvMsg = GSMGet();
 
 		switch (state)
 		{
@@ -106,7 +106,7 @@ void Sim900Handler::sim900Hdl()
 			cout << "From phone number: " << phoneNum << endl;
 			cout << "Received sms: " << rcvMsg << endl;
 
-			ClientSim900 *client = new ClientSim900(mAggregator, rcvMsg, phoneNum);
+			ClientGSM *client = new ClientGSM(mAggregator, rcvMsg, phoneNum);
 			client->start();
 
 			state = 0;
@@ -119,7 +119,7 @@ void Sim900Handler::sim900Hdl()
 /**
  * For testing uart
  */
-void Sim900Handler::uartTest()
+void GSM::uartTest()
 {
 	//----- TX BYTES -----
 
@@ -154,11 +154,11 @@ void Sim900Handler::uartTest()
 }
 
 /**
- * Sim900 configuration
+ * GSM configuration
  */
-void Sim900Handler::sim900Init()
+void GSM::GSMInit()
 {
-	printf("Initializing Sim900...\n");
+	printf("Initializing GSM module...\n");
 	sleep(1); //delay 1s
 
 	mRcvCharBuf.clear();// This is temporary, flushing in OS is a better practice
@@ -200,7 +200,7 @@ void Sim900Handler::sim900Init()
 /**
  * Read as many bytes as possible and store in the circular buffer
  */
-void Sim900Handler::sim900Monitor()
+void GSM::GSMMonitor()
 {
 	uint8_t rcvBuf[BUFFER_SIZE];
 
@@ -230,7 +230,7 @@ void Sim900Handler::sim900Monitor()
  * Wait until receiving \r\n
  * @Return:	The received message
  */
-string Sim900Handler::sim900Get()
+string GSM::GSMGet()
 {
 	uint8_t rcvStr[BUFFER_SIZE];
 	uint16_t rcvIdx = 0;
@@ -268,17 +268,17 @@ string Sim900Handler::sim900Get()
 }
 
 /**
- * Wait until receiving OK from Sim900
+ * Wait until receiving OK from GSM module
  * Return:
  * 	1 if success
  * 	-1 in case of receiving ERROR
  */
-int Sim900Handler::waitForOk()
+int GSM::waitForOk()
 {
 	string rcvMsg;
 	while (rcvMsg.find("OK") == string::npos)
 	{
-		rcvMsg = sim900Get();
+		rcvMsg = GSMGet();
 
 		if (rcvMsg.find("ERROR") != string::npos)
 			return -1;
@@ -287,7 +287,7 @@ int Sim900Handler::waitForOk()
 	return 0;
 }
 
-int Sim900Handler::uartBaudrate(int aBaudrate)
+int GSM::uartBaudrate(int aBaudrate)
 {
 	switch (aBaudrate)
 	{
@@ -303,7 +303,7 @@ int Sim900Handler::uartBaudrate(int aBaudrate)
 	return -1;
 }
 
-int Sim900Handler::sendSms(const string &aPhoneNum, const string &aMsg)
+int GSM::sendSms(const string &aPhoneNum, const string &aMsg)
 {
     char sendMsg[50];
 

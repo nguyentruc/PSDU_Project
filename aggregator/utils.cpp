@@ -11,6 +11,6 @@ int makeRealTimeThread()
 {
 	struct sched_param params;
 
-	params.__sched_priority = sched_get_priority_max(SCHED_FIFO);
+	params.__sched_priority = 60; //should not get too high priority, may override system's modules
 	return pthread_setschedparam(pthread_self(), SCHED_FIFO, &params);
 }

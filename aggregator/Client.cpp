@@ -40,21 +40,21 @@ int Client::unSubscribe(const string& aStatus, const string& aPhoneNum)
 {
 }
 
-ClientSim900::ClientSim900(Aggregator *anAggregator, const string& aMessage, const string& aPhoneNum)
+ClientGSM::ClientGSM(Aggregator *anAggregator, const string& aMessage, const string& aPhoneNum)
 {
 	mAggregator = anAggregator;
 	mMessage = aMessage;
 	mPhoneNum = aPhoneNum;
 }
 
-ClientSim900::~ClientSim900()
+ClientGSM::~ClientGSM()
 {
 }
 
-void ClientSim900::clientHandler()
+void ClientGSM::clientHandler()
 {
-	pthread_setname_np(pthread_self(), "Sim900");
-	cout << "Sim900 Handler\n";
+	pthread_setname_np(pthread_self(), "GSM");
+	cout << "GSM Handler\n";
 
 	//TODO: Handle subscribers
 

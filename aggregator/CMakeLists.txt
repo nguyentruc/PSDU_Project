@@ -23,7 +23,7 @@ set ( aggregator_SRCS
     Aggregator.cpp
     jsoncpp.cpp
     PowerHandler.cpp
-    Sim900Handler.cpp
+    GSM.cpp
     Client.cpp
     utils.cpp
 )
