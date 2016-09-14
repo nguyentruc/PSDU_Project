@@ -38,6 +38,13 @@ private:
 
 	int mUartFd;
 
+	/* Notify upon receiving "OK" to other threads */
+	boost::mutex mMtx_IsOk;
+	boost::condition_variable mCv_IsOk;
+	bool mIsOk;
+
+	boost::mutex mMtx_sendSMS; //Only one thread can send SMS at a time
+
 	void uartTest();
 	void GSMInit();
 	void uartSetup(const char *aDevice, int aBaudrate);

@@ -101,6 +101,12 @@ void GSM::GSMHandler()
 				int secondQuote = rcvMsg.find('\"', firstQuote + 1);
 				phoneNum = rcvMsg.substr(firstQuote + 1, secondQuote - firstQuote - 1);
 			}
+			else if (rcvMsg.find("OK") != string::npos)
+			{
+				boost::unique_lock<boost::mutex> uniLck(mMtx_IsOk);
+				mIsOk = 1;
+				mCv_IsOk.notify_all();
+			}
 			break;
 		case 1: // get sms body
 			cout << "From phone number: " << phoneNum << endl;
@@ -216,7 +222,7 @@ void GSM::GSMMonitor()
 			return;
 		}
 
-		boost::unique_lock<boost::mutex> guard(mMtx_RcvCharBuf);
+		boost::unique_lock<boost::mutex> uniLck(mMtx_RcvCharBuf);
 
 		for (int i = 0; i < length; i++)
 		{
@@ -237,18 +243,18 @@ string GSM::GSMGet()
 
 	while (1)
 	{
-		boost::unique_lock<boost::mutex> guard(mMtx_RcvCharBuf);
+		boost::unique_lock<boost::mutex> uniLck(mMtx_RcvCharBuf);
 
 		while (mRcvCharBuf.empty() == true)
 		{
-			mCv_RcvCharBuf.wait(guard);
+			mCv_RcvCharBuf.wait(uniLck);
 		}
 
 		/* read each byte from the buffer */
 		rcvStr[rcvIdx] = mRcvCharBuf.front();
 		mRcvCharBuf.pop_front();
 
-		guard.unlock();
+		uniLck.unlock();
 
 		/* Check for \r\n */
 		if (rcvIdx > 0)
@@ -305,14 +311,20 @@ int GSM::uartBaudrate(int aBaudrate)
 
 int GSM::sendSms(const string &aPhoneNum, const string &aMsg)
 {
+	boost::lock_guard<boost::mutex> lckGuard(mMtx_sendSMS);
     char sendMsg[50];
+
+    cout << "Sending SMS message to " << aPhoneNum << endl;
 
     dprintf(mUartFd, "AT+CMGS=\"%s\"\r", aPhoneNum.c_str());
     sleep(1);
 
     dprintf(mUartFd, "%s", aMsg.c_str());
-    sleep(1);
-
     dprintf(mUartFd, "%c", 0x1A);
-	return 0;
+
+    /* Wait for OK */
+	boost::unique_lock<boost::mutex> uniLck(mMtx_IsOk);
+	mCv_IsOk.wait(uniLck);
+
+	return mIsOk;
 }
