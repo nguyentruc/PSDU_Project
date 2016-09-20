@@ -47,6 +47,7 @@ void GSM::uartSetup(const char *aDevice, int aBaudrate)
 	{
 		//ERROR - CAN'T OPEN SERIAL PORT
 		printf("Error - Unable to open UART.  Ensure it is not in use by another application\n");
+		return;
 	}
 
 	//CONFIGURE THE UART

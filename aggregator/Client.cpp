@@ -10,6 +10,7 @@
 Client::Client()
 {
 	mAggregator = NULL;
+	mSockFd = -1;
 }
 
 Client::~Client()
@@ -104,5 +105,44 @@ void Client::addSubscriberHdl(Json::Value &aRoot)
 	cout << "outMsg = " << outMsg << endl;
 	cout << "outMsg's size = " << outMsg.size() << endl;
 
-	//TODO: send to Client
+	if (send(mSockFd, outMsg.c_str(), outMsg.size() + 1, 0) != outMsg.size() + 1)
+	{
+		cout << "send() failed from: " << __FILE__ << ":" << __LINE__ << endl;
+	}
+}
+
+ClientBLE::ClientBLE(Aggregator* anAggregator, int aSockFd)
+{
+	mAggregator = anAggregator;
+	mSockFd = aSockFd;
+}
+
+ClientBLE::~ClientBLE()
+{
+}
+
+void ClientBLE::clientHandler()
+{
+	int rcvMsgSize;
+	char rcvBuffer[RCV_BUF_SIZE];
+	char threadName[10];
+
+	sprintf(threadName, "BLE %d", mSockFd);
+	pthread_setname_np(pthread_self(), threadName);
+	cout << "Handling BLE client" << endl;
+
+	while (1)
+	{
+		if ((rcvMsgSize = recv(mSockFd, rcvBuffer, RCV_BUF_SIZE, 0)) <= 0)
+		{
+			cout << "recv() failed from: " << __FILE__ << ":" << __LINE__ << endl;
+			cout << "rcvMsgSize = " << rcvMsgSize << endl;
+
+			delete this;
+			return;
+		}
+
+		rcvBuffer[rcvMsgSize] = NULL;
+		printf("Received BLE: %s\n", rcvBuffer);
+	}
 }

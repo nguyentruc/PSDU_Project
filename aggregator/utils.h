@@ -18,6 +18,10 @@
 #include <string>
 #include <stdint.h>
 #include <sys/time.h>
+#include <sys/socket.h>
+
+#include <bluetooth/bluetooth.h>
+#include <bluetooth/rfcomm.h>
 
 #include <boost/thread.hpp>
 #include <boost/program_options.hpp>
@@ -25,5 +29,6 @@
 namespace po = boost::program_options;
 
 int makeRealTimeThread();
+void dieWithError(const char *anErrMess);
 
 #endif

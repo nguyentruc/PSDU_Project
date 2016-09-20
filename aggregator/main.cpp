@@ -34,7 +34,8 @@ int processCommandLineArgument(int argc, char **argv)
 			("help,h", "Print help messages")
 			("version,v", "Display the version number")
 			("serialDevice,s", po::value<string>()->required() , "Path to serial port")
-			("baudrate,b", po::value<int>()->default_value(115200), "Baudrate of the serial port");
+			("baudrate,b", po::value<int>()->default_value(115200), "Baudrate of the serial port")
+			("noGSM", "Disable GSM module");
 
 	try
 	{

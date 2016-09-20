@@ -16,12 +16,57 @@ Aggregator::Aggregator()
 
 void Aggregator::start()
 {
-	mGSMHdl->start();
+	if (gPROG_ARGUMENT.count("noGSM") == 0)
+	{
+		mGSMHdl->start();
+	}
 	mPowerHdl->start();
 
-	for (;;)
+	/* Create bluetooth server */
+    struct sockaddr_rc servAddr, clntAddr;
+    int servSock, clntSock;
+    socklen_t clntLen = sizeof(clntAddr);
+
+    // allocate socket
+    if ((servSock = socket(AF_BLUETOOTH, SOCK_STREAM, BTPROTO_RFCOMM)) < 0)
+    {
+		dieWithError("socket() failed");
+    }
+
+    // bind socket to port 1 of the first available
+    // local bluetooth adapter
+    str2ba("00:00:00:00:00:00", &servAddr.rc_bdaddr);
+    servAddr.rc_family = AF_BLUETOOTH;
+    servAddr.rc_channel = (uint8_t) 1;
+
+    if ((bind(servSock, (struct sockaddr *)&servAddr, sizeof(servAddr))) < 0)
 	{
-		pause();
+		dieWithError("Aggregator bind() failed");
+	}
+
+    // put socket into listening mode
+    if (listen(servSock, 5) < 0)
+    {
+		dieWithError("listen() failed");
+    }
+
+	while (1)
+	{
+		cout << "Waiting for clients..." << endl;
+
+		if ((clntSock = accept(servSock, (struct sockaddr *)&clntAddr, &clntLen)) < 0)
+		{
+			cout << "ERR: accept() failed";
+			continue;
+		}
+
+		char buf[100];
+		ba2str( &clntAddr.rc_bdaddr, buf );
+	    cout << "accepted connection from " << buf << endl;
+	    memset(buf, 0, sizeof(buf));
+
+		ClientBLE *clnt = new ClientBLE(this, clntSock);
+		clnt->start();
 	}
 }
 

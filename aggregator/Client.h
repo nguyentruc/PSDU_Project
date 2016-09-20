@@ -25,12 +25,24 @@ public:
 
 protected:
 	Aggregator *mAggregator;
+	int mSockFd;
 
 	int subscribe(const string& aStatus, const string& aPhoneNum);
 	int unSubscribe(const string& aStatus, const string& aPhoneNum);
 	void addSubscriberHdl(Json::Value &aRoot);
 	int receivedCmdHandler(const char* aRcvMsg, int aRcvMsgSize);
 	virtual void clientHandler() {};
+};
+
+class ClientBLE: public Client
+{
+public:
+	ClientBLE(Aggregator *anAggregator, int aSockFd);
+	~ClientBLE();
+
+private:
+	const static int RCV_BUF_SIZE = 1024;
+	void clientHandler();
 };
 
 class ClientGSM: public Client
