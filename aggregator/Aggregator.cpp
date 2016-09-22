@@ -12,6 +12,11 @@ Aggregator::Aggregator()
 	mGSMHdl = new GSM(this, gPROG_ARGUMENT["serialDevice"].as<string>().c_str(),
 			gPROG_ARGUMENT["baudrate"].as<int>());
 	mPowerHdl = new PowerHandler(this);
+
+	mPin[0] = new GPIO(14, 2);
+	mPin[1] = new GPIO(15, 2);
+	mPin[2] = new GPIO(49, 2);
+	mPin[3] = new GPIO(12, 2);
 }
 
 void Aggregator::start()
@@ -104,7 +109,7 @@ void Aggregator::notifySubscribers(int aStatusId, bool aValue)
 		return;
 	}
 
-	cout << "Notify clients" << endl;
+	cout << "Notify " << subscriberList.size() << " clients" << endl;
 
 	/* Construct JSON */
 	Json::Value root;

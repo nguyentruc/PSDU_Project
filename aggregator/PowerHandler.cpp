@@ -7,6 +7,7 @@
 
 #include "PowerHandler.h"
 #include "gpio/GPIO.h"
+#include <poll.h>
 
 PowerHandler::PowerHandler(Aggregator *anAggregator)
 {
@@ -25,25 +26,61 @@ void PowerHandler::start()
 
 void PowerHandler::powerHdl()
 {
-	/* Simulate power outage by reading number 7 from stdin */
-	int input;
-	GPIO pin14 = GPIO(14, 1);
-	for (;;)
-	{
-		scanf("%d", &input);
+//	int input;
+	GPIO pin13 = GPIO(13, 0);
+	int gpioFd = pin13.getFd();
+	char buf[10];
+	struct pollfd fdset;
 
-		if (input == 7)
+	pin13.setEdge("falling");
+
+//	for (;;)
+//	{
+//		scanf("%d", &input);
+//
+//		if (input == 7)
+//		{
+//			mAggregator->notifySubscribers(POWER_STATUS, false);
+//		}
+//		/* Test GPIO */
+//		else if (input == 0)
+//		{
+//			pin14.setValue(0);
+//		}
+//		else if (input == 1)
+//		{
+//			pin14.setValue(1);
+//		}
+//	}
+	makeRealTimeThread();
+
+	fdset.fd = gpioFd;
+	fdset.events = POLLPRI;
+
+	lseek(gpioFd, 0, SEEK_SET);    /* consume any prior interrupt */
+	read(gpioFd, buf, sizeof buf);
+
+	while (1)
+	{
+		int rc = poll(&fdset, 1, -1);
+
+		if (rc < 0)
 		{
+			printf("\npoll() failed!\n");
+			return;
+		}
+
+		if (rc == 0)
+		{
+			printf(".");
+		}
+
+		if (fdset.revents & POLLPRI)
+		{
+			lseek(gpioFd, 0, SEEK_SET);    /* consume interrupt */
+			read(gpioFd, buf, sizeof buf);
+			cout << "poll() GPIO " << 13 << " interrupt occurred\n";
 			mAggregator->notifySubscribers(POWER_STATUS, false);
-		}
-		/* Test GPIO */
-		else if (input == 0)
-		{
-			pin14.setValue(0);
-		}
-		else if (input == 1)
-		{
-			pin14.setValue(1);
 		}
 	}
 }

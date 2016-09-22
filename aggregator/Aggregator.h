@@ -13,6 +13,7 @@
 #include "utils.h"
 #include "Client.h"
 #include "PowerHandler.h"
+#include "gpio/GPIO.h"
 
 #include <list>
 #include <map>
@@ -31,6 +32,8 @@ const int POWER_STATUS = 0;
 class Aggregator
 {
 public:
+	GPIO* mPin[4];
+
 	Aggregator();
 	virtual ~Aggregator();
 

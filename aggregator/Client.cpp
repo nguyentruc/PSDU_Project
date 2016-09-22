@@ -144,5 +144,32 @@ void ClientBLE::clientHandler()
 
 		rcvBuffer[rcvMsgSize] = NULL;
 		printf("Received BLE: %s\n", rcvBuffer);
+		iotDemoDeviceController(rcvBuffer, rcvMsgSize);
+	}
+}
+
+void Client::iotDemoDeviceController(const char* aRcvMsg, int aRcvMsgSize)
+{
+	Json::Reader reader;
+	Json::Value root;
+
+	if (reader.parse(aRcvMsg, aRcvMsg + aRcvMsgSize, root) == 0)
+	{
+		cout << "Error: Parse JSON failed" << endl;
+		return;
+	}
+
+	for (Json::ValueIterator itr = root["ON"].begin(); itr != root["ON"].end(); ++itr)
+	{
+		int index = itr->asInt();
+		//cout << "index " << index << endl;
+		mAggregator->mPin[index - 1]->setValue(0);
+	}
+
+	for (Json::ValueIterator itr = root["OFF"].begin(); itr != root["OFF"].end(); ++itr)
+	{
+		int index = itr->asInt();
+		//cout << "index " << index << endl;
+		mAggregator->mPin[index - 1]->setValue(1);
 	}
 }

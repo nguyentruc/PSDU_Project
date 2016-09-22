@@ -32,6 +32,8 @@ protected:
 	void addSubscriberHdl(Json::Value &aRoot);
 	int receivedCmdHandler(const char* aRcvMsg, int aRcvMsgSize);
 	virtual void clientHandler() {};
+
+	void iotDemoDeviceController(const char* aRcvMsg, int aRcvMsgSize);
 };
 
 class ClientBLE: public Client

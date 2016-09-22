@@ -21,6 +21,16 @@ int main(int argc, char **argv)
 	}
 
 	Aggregator aggregator;
+
+	if (gPROG_ARGUMENT.count("subscribe")) //initial subscription
+	{
+		vector<string> listNum = gPROG_ARGUMENT["subscribe"].as<vector<string> >();
+		for (int i = 0; i < listNum.size(); i++)
+		{
+			aggregator.addSubscriber(POWER_STATUS, listNum[i]);
+		}
+	}
+
 	aggregator.start();
 
 	return 0;
@@ -35,7 +45,8 @@ int processCommandLineArgument(int argc, char **argv)
 			("version,v", "Display the version number")
 			("serialDevice,s", po::value<string>()->required() , "Path to serial port")
 			("baudrate,b", po::value<int>()->default_value(115200), "Baudrate of the serial port")
-			("noGSM", "Disable GSM module");
+			("noGSM", "Disable GSM module")
+			("subscribe",  po::value<vector<string> >(), "Subscribe a phone number to power status");
 
 	try
 	{
