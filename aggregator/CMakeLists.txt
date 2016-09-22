@@ -26,6 +26,7 @@ set ( aggregator_SRCS
     GSM.cpp
     Client.cpp
     utils.cpp
+    gpio/GPIO.cpp
 )
 add_executable(aggregator ${aggregator_SRCS})
 target_link_libraries(aggregator ${LIBRARIES})
