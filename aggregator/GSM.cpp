@@ -69,7 +69,7 @@ void GSM::uartSetup(const char *aDevice, int aBaudrate)
 	tcsetattr(mUartFd, TCSANOW, &options);
 
 	//TODO: Flush input buffer before starting
-	sleep(2);
+	//sleep(2);
 	tcflush(mUartFd, TCIFLUSH);
 }
 

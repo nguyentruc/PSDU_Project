@@ -6,18 +6,15 @@
  */
 
 #include "GPIO.h"
-#include <fcntl.h>
-#include <stdio.h>
-#include <string.h>
-#include <unistd.h>
 
 #define MAX_BUF 64
 #define SYSFS_GPIO_DIR "/sys/class/gpio"
 
-GPIO::GPIO(int aPinNum, bool isOut)
+GPIO::GPIO(int aPinNum, uint8_t isOut)
 {
 	mPinNum = aPinNum;
 	mFd = -1;
+	mCurValue = -1;
 
 	gpioExport();
 	setDirection(isOut);
@@ -28,7 +25,7 @@ GPIO::~GPIO()
 	if (mFd >= 0) close(mFd);
 }
 
-int GPIO::setDirection(bool aWayOut)
+int GPIO::setDirection(uint8_t aWayOut)
 {
 	int fd, len;
 	char buf[MAX_BUF];
@@ -42,13 +39,17 @@ int GPIO::setDirection(bool aWayOut)
 		return fd;
 	}
 
-	if(aWayOut)
+	if(aWayOut == 1)
 	{
 		write(fd, "out", 4);
 	}
-	else
+	else if (aWayOut == 0)
 	{
 		write(fd, "in", 3);
+	}
+	else if (aWayOut == 2)
+	{
+		write(fd, "high", 5);
 	}
 
 	mIsOut = aWayOut;

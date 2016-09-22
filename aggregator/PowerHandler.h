@@ -22,6 +22,7 @@ public:
 
 private:
 	Aggregator *mAggregator;
+	static const int mPIN_NUM = 13;
 
 	void powerHdl();
 };

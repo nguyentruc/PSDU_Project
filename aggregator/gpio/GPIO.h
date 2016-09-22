@@ -8,13 +8,19 @@
 #ifndef AGGREGATOR_GPIO_GPIO_H_
 #define AGGREGATOR_GPIO_GPIO_H_
 
+#include <fcntl.h>
+#include <stdio.h>
+#include <string.h>
+#include <unistd.h>
+#include <stdint.h>
+
 class GPIO
 {
 public:
-	GPIO(int aPinNum, bool isOut = true);
+	GPIO(int aPinNum, uint8_t isOut = 1);
 	virtual ~GPIO();
 
-	int setDirection(bool aWayOut);
+	int setDirection(uint8_t aWayOut);
 	int getValue();
 	int setEdge(const char* anEdge);
 	int setValue(int aValue);

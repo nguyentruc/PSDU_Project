@@ -60,7 +60,7 @@ void Aggregator::start()
 			continue;
 		}
 
-		char buf[100];
+		char buf[20];
 		ba2str( &clntAddr.rc_bdaddr, buf );
 	    cout << "accepted connection from " << buf << endl;
 	    memset(buf, 0, sizeof(buf));
@@ -104,7 +104,7 @@ void Aggregator::notifySubscribers(int aStatusId, bool aValue)
 		return;
 	}
 
-	cout << "Notify clients" << endl;
+	cout << "Notify " << subscriberList.size() << " clients" << endl;
 
 	/* Construct JSON */
 	Json::Value root;
