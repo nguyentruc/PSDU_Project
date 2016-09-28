@@ -26,10 +26,14 @@ public:
 protected:
 	Aggregator *mAggregator;
 	int mSockFd;
+	uint8_t mUser;// mode = 0: subscriber ; mode = 1: admin
 
 	int subscribe(const string& aStatus, const string& aPhoneNum);
 	int unSubscribe(const string& aStatus, const string& aPhoneNum);
-	void addSubscriberHdl(Json::Value &aRoot);
+
+	int addSubscriberHdl(Json::Value &aRoot);
+	int sessionInitiation(const char* aRcvMsg, int aRcvMsgSize);
+
 	int receivedCmdHandler(const char* aRcvMsg, int aRcvMsgSize);
 	virtual void clientHandler() {};
 };

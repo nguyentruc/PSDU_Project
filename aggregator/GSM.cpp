@@ -263,7 +263,7 @@ string GSM::GSMGet()
 			if (rcvStr[rcvIdx - 1] == '\r' && rcvStr[rcvIdx] == '\n')
 			{
 				string ret((char *)rcvStr, rcvIdx - 1);
-				cout << "Received: " << ret << endl;
+				cout << "Received GSM: " << ret << endl;
 				return ret;
 			}
 		}

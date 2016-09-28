@@ -12,6 +12,8 @@ Aggregator::Aggregator()
 	mGSMHdl = new GSM(this, gPROG_ARGUMENT["serialDevice"].as<string>().c_str(),
 			gPROG_ARGUMENT["baudrate"].as<int>());
 	mPowerHdl = new PowerHandler(this);
+	mAdminPwd = "admin";
+	mSubscriberPwd = "";
 }
 
 void Aggregator::start()
@@ -78,6 +80,13 @@ Aggregator::~Aggregator()
 void Aggregator::addSubscriber(int aStatusId, const string& aPhoneNum)
 {
 	boost::lock_guard<boost::mutex> guard(mMtx_SubscriberList);
+
+	// If the phone number is already in the list, stop.
+	if (find(mSubscriberList[aStatusId].begin(), mSubscriberList[aStatusId].end(),
+			aPhoneNum) != mSubscriberList[aStatusId].end())
+	{
+		return;
+	}
 
 	mSubscriberList[aStatusId].push_back(aPhoneNum);
 }

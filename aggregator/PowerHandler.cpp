@@ -27,6 +27,8 @@ void PowerHandler::start()
 
 void PowerHandler::powerHdl()
 {
+	pthread_setname_np(pthread_self(), "PowerHandler");
+
 	GPIO pinPwr = GPIO(mPIN_NUM, 0);
 	int gpioFd = pinPwr.getFd();
 	char buf[10];
