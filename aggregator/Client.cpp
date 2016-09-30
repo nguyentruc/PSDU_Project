@@ -40,6 +40,7 @@ int Client::subscribe(const string& aStatus, const string& aPhoneNum)
 
 int Client::unSubscribe(const string& aStatus, const string& aPhoneNum)
 {
+	return 0;
 }
 
 ClientGSM::ClientGSM(Aggregator *anAggregator, const string& aMessage, const string& aPhoneNum)
@@ -135,6 +136,55 @@ int Client::sessionInitiation(const char* aRcvMsg, int aRcvMsgSize)
 	return ret;
 }
 
+int Client::getSubscriberListHdl(Json::Value& aRoot)
+{
+	Json::Value response;
+	int8_t ret = 0;
+
+	list<string> subscriberList;
+
+	response["result"] = "SUCCESS";
+	response["desc"] = "Subscriber list";
+
+	if (aRoot.isMember("status") == false)
+	{
+		ret = -1;
+	}
+	else if (getSubscriberlist(aRoot["status"].asString(), subscriberList) < 0)
+	{
+		ret = -2;
+	}
+
+	if (ret < 0)
+	{
+		response["result"] = "FAILED";
+		if (ret == -1) response["desc"] = "Parameter missing";
+		else if (ret == -2) response["desc"] = string(aRoot["status"].asString() + " is not supported");
+	}
+	else
+	{
+		response["list"] = Json::arrayValue;
+
+		for (list<string>::const_iterator it = subscriberList.begin(); it != subscriberList.end(); ++it)
+		{
+			response["list"].append(*it);
+		}
+	}
+
+	Json::FastWriter writer;
+	string outMsg = writer.write(response);
+
+	cout << "outMsg's size = " << outMsg.size() << endl;
+	cout << "outMsg = " << outMsg << endl;
+
+	if (send(mSockFd, outMsg.c_str(), outMsg.size() + 1, 0) != outMsg.size() + 1)
+	{
+		cout << "send() failed from: " << __FILE__ << ":" << __LINE__ << endl;
+	}
+
+	return ret;
+}
+
 int Client::receivedCmdHandler(const char* aRcvMsg, int aRcvMsgSize)
 {
 	Json::Reader reader;
@@ -149,6 +199,10 @@ int Client::receivedCmdHandler(const char* aRcvMsg, int aRcvMsgSize)
 	if (root["action"] == "AddSubscriber")
 	{
 		return addSubscriberHdl(root);
+	}
+	if (root["action"] == "GetSubscriberList")
+	{
+		return getSubscriberListHdl(root);
 	}
 	else
 	{
@@ -251,4 +305,18 @@ void ClientBLE::clientHandler()
 
 		receivedCmdHandler(rcvBuffer, rcvMsgSize);
 	}
+}
+
+int Client::getSubscriberlist(const string& aStatus, list<string>& aSubscriberList)
+{
+	if (aStatus == "Power")
+	{
+		aSubscriberList = mAggregator->getSubscriberList(POWER_STATUS);
+	}
+	else
+	{
+		return -1;
+	}
+
+	return 0;
 }

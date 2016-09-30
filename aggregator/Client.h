@@ -28,14 +28,17 @@ protected:
 	int mSockFd;
 	uint8_t mUser;// mode = 0: subscriber ; mode = 1: admin
 
-	int subscribe(const string& aStatus, const string& aPhoneNum);
-	int unSubscribe(const string& aStatus, const string& aPhoneNum);
-
-	int addSubscriberHdl(Json::Value &aRoot);
 	int sessionInitiation(const char* aRcvMsg, int aRcvMsgSize);
+	int addSubscriberHdl(Json::Value &aRoot);
+	int getSubscriberListHdl(Json::Value &aRoot);
 
 	int receivedCmdHandler(const char* aRcvMsg, int aRcvMsgSize);
 	virtual void clientHandler() {};
+
+private:
+	int subscribe(const string& aStatus, const string& aPhoneNum);
+	int unSubscribe(const string& aStatus, const string& aPhoneNum);
+	int getSubscriberlist(const string& aStatus, list<string>& aSubscriberList);
 };
 
 class ClientBLE: public Client

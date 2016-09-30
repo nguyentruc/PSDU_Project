@@ -39,6 +39,7 @@ public:
 	bool compareAdminPwd(const string& anAdminPwd);
 	bool compareSubscriberPwd(const string& aSubscriberPwd);
 	void notifySubscribers(int aStatusId, bool aValue);
+	list<string> getSubscriberList(int aStatusId);
 
 private:
 	GSM *mGSMHdl;
@@ -53,8 +54,6 @@ private:
 
 	string mSubscriberPwd;
 	boost::mutex mMtx_SubscriberPwd;
-
-	list<string> getSubscriberList(int aStatusId);
 };
 
 #endif /* AGGREGATOR_AGGREGATOR_H_ */
