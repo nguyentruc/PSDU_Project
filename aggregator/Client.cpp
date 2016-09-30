@@ -10,7 +10,6 @@
 Client::Client()
 {
 	mAggregator = NULL;
-	mSockFd = -1;
 	mUser = 0;
 }
 
@@ -43,25 +42,18 @@ int Client::unSubscribe(const string& aStatus, const string& aPhoneNum)
 	return 0;
 }
 
-ClientGSM::ClientGSM(Aggregator *anAggregator, const string& aMessage, const string& aPhoneNum)
+int Client::getSubscriberlist(const string& aStatus, list<string>& aSubscriberList)
 {
-	mAggregator = anAggregator;
-	mMessage = aMessage;
-	mPhoneNum = aPhoneNum;
-}
+	if (aStatus == "Power")
+	{
+		aSubscriberList = mAggregator->getSubscriberList(POWER_STATUS);
+	}
+	else
+	{
+		return -1;
+	}
 
-ClientGSM::~ClientGSM()
-{
-}
-
-void ClientGSM::clientHandler()
-{
-	pthread_setname_np(pthread_self(), "GSM");
-	cout << "GSM Handler\n";
-
-	//TODO: Handle subscribers
-
-	delete this;
+	return 0;
 }
 
 int Client::sessionInitiation(const char* aRcvMsg, int aRcvMsgSize)
@@ -122,16 +114,7 @@ int Client::sessionInitiation(const char* aRcvMsg, int aRcvMsgSize)
 		else if (ret == -3) response["desc"] = "Parameter missing";
 	}
 
-	Json::FastWriter writer;
-	string outMsg = writer.write(response);
-
-	cout << "outMsg's size = " << outMsg.size() << endl;
-	cout << "outMsg = " << outMsg << endl;
-
-	if (send(mSockFd, outMsg.c_str(), outMsg.size() + 1, 0) != outMsg.size() + 1)
-	{
-		cout << "send() failed from: " << __FILE__ << ":" << __LINE__ << endl;
-	}
+	sendToClient(response);
 
 	return ret;
 }
@@ -171,16 +154,7 @@ int Client::getSubscriberListHdl(Json::Value& aRoot)
 		}
 	}
 
-	Json::FastWriter writer;
-	string outMsg = writer.write(response);
-
-	cout << "outMsg's size = " << outMsg.size() << endl;
-	cout << "outMsg = " << outMsg << endl;
-
-	if (send(mSockFd, outMsg.c_str(), outMsg.size() + 1, 0) != outMsg.size() + 1)
-	{
-		cout << "send() failed from: " << __FILE__ << ":" << __LINE__ << endl;
-	}
+	sendToClient(response);
 
 	return ret;
 }
@@ -233,16 +207,7 @@ int Client::addSubscriberHdl(Json::Value &aRoot)
 		ret = -1;
 	}
 
-	Json::FastWriter writer;
-	string outMsg = writer.write(response);
-
-	cout << "outMsg's size = " << outMsg.size() << endl;
-	cout << "outMsg = " << outMsg << endl;
-
-	if (send(mSockFd, outMsg.c_str(), outMsg.size() + 1, 0) != outMsg.size() + 1)
-	{
-		cout << "send() failed from: " << __FILE__ << ":" << __LINE__ << endl;
-	}
+	ret = sendToClient(response);
 
 	return ret;
 }
@@ -307,16 +272,45 @@ void ClientBLE::clientHandler()
 	}
 }
 
-int Client::getSubscriberlist(const string& aStatus, list<string>& aSubscriberList)
+int ClientBLE::sendToClient(const Json::Value& aRoot)
 {
-	if (aStatus == "Power")
+	Json::FastWriter writer;
+	string outMsg = writer.write(aRoot);
+
+	cout << "outMsg's size = " << outMsg.size() << endl;
+	cout << "outMsg = " << outMsg << endl;
+
+	if (send(mSockFd, outMsg.c_str(), outMsg.size() + 1, 0) != outMsg.size() + 1)
 	{
-		aSubscriberList = mAggregator->getSubscriberList(POWER_STATUS);
-	}
-	else
-	{
+		cout << "send() failed from: " << __FILE__ << ":" << __LINE__ << endl;
 		return -1;
 	}
 
+	return 0;
+}
+
+ClientGSM::ClientGSM(Aggregator *anAggregator, const string& aMessage, const string& aPhoneNum)
+{
+	mAggregator = anAggregator;
+	mMessage = aMessage;
+	mPhoneNum = aPhoneNum;
+}
+
+ClientGSM::~ClientGSM()
+{
+}
+
+void ClientGSM::clientHandler()
+{
+	pthread_setname_np(pthread_self(), "GSM");
+	cout << "GSM Handler\n";
+
+	//TODO: Handle subscribers
+
+	delete this;
+}
+
+int ClientGSM::sendToClient(const Json::Value& aRoot)
+{
 	return 0;
 }
