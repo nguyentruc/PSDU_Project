@@ -34,3 +34,9 @@ set (	test_story0014_SRCS
 )
 add_executable(test_story0014 ${test_story0014_SRCS})
 target_link_libraries(test_story0014 story_static)
+
+set (	test_storyUnknown_SRCS
+	test_storyUnknown.cpp
+)
+add_executable(test_storyUnknown ${test_storyUnknown_SRCS})
+target_link_libraries(test_storyUnknown story_static)

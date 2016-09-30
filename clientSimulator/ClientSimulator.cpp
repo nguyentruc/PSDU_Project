@@ -41,7 +41,7 @@ void ClientSimulator::connectToServer()
 
 }
 
-void ClientSimulator::sessionInitiation_Normal(string& anUser)
+void ClientSimulator::sessionInitiation_Normal(const string& anUser)
 {
 	Json::Value root;
 
@@ -59,6 +59,59 @@ void ClientSimulator::sessionInitiation_Normal(string& anUser)
 		root["user"] = "subscriber";
 		root["pass"] = "";
 	}
+
+	Json::FastWriter writer;
+	string outMsg = writer.write(root);
+
+	cout << "outMsg's size = " << outMsg.size() << endl;
+	cout << "outMsg = " << outMsg << endl;
+
+	if (send(mSock, outMsg.c_str(), outMsg.size() + 1, 0) != outMsg.size() + 1)
+	{
+		cout << "send() failed from: " << __FILE__ << ":" << __LINE__ << endl;
+	}
+
+	Json::StyledWriter writerStyle;
+	string rcvMsg = writerStyle.write(root);
+
+	printf("JSON: %s\n", rcvMsg.c_str());
+}
+
+void ClientSimulator::addSubscriber_Normal(const string& aNumber, const string& aStatus)
+{
+	Json::Value root;
+
+	printf("Command: Add Subscriber (Normal)\n");
+
+	root["action"] = "AddSubscriber";
+	root["status"] = aStatus;
+	root["phone"] = aNumber;
+
+	Json::FastWriter writer;
+	string outMsg = writer.write(root);
+
+	cout << "outMsg's size = " << outMsg.size() << endl;
+	cout << "outMsg = " << outMsg << endl;
+
+	if (send(mSock, outMsg.c_str(), outMsg.size() + 1, 0) != outMsg.size() + 1)
+	{
+		cout << "send() failed from: " << __FILE__ << ":" << __LINE__ << endl;
+	}
+
+	Json::StyledWriter writerStyle;
+	string rcvMsg = writerStyle.write(root);
+
+	printf("JSON: %s\n", rcvMsg.c_str());
+}
+
+void ClientSimulator::getSubscriberList_Normal(const string& aStatus)
+{
+	Json::Value root;
+
+	printf("Command: Get Subscriber List (Normal)\n");
+
+	root["action"] = "GetSubscriberList";
+	root["status"] = aStatus;
 
 	Json::FastWriter writer;
 	string outMsg = writer.write(root);
@@ -106,10 +159,6 @@ void ClientSimulator::receive()
 	string rcvMsg = writer.write(root);
 
 	printf("JSON: %s\n", rcvMsg.c_str());
-}
-
-void ClientSimulator::addSubscriber_Normal()
-{
 }
 
 int processCommandLineArgument(int argc, char **argv)

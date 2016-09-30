@@ -23,8 +23,10 @@ public:
 
 	void connectToServer();
 	void receive();
-	void sessionInitiation_Normal(string& anUser);
-	void addSubscriber_Normal();
+
+	void sessionInitiation_Normal(const string& anUser);
+	void addSubscriber_Normal(const string& aNumber, const string& aStatus);
+	void getSubscriberList_Normal(const string& aStatus);
 
 private:
 	int mSock;
