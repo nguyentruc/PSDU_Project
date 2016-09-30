@@ -1,8 +1,18 @@
-Usage: (Required cmake)
+Usage: (Requires cmake)
   $ mkdir build
   $ cd build
   $ cmake ..
   $ make aggregator
 
+Automation cross-compiling
+  $ cd crossCompile
+  $ ./auto-cross-compile.sh <TARGET_USER> <TARGET_IP>
+
 Create virtual serial port:
   sudo socat PTY,link=/dev/ttyS10 PTY,link=/dev/ttyS11
+
+Create rfcomm socket:
+  server: rfcomm watch hci0 <channel>
+  client: rfcomm connect <addr> <channel>
+
+
