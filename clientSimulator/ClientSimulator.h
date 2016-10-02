@@ -21,11 +21,18 @@ public:
 	ClientSimulator();
 	virtual ~ClientSimulator();
 
-	void connectToServer();
+	void connectToPSDU();
 	void receive();
+	void sendToPSDU(const Json::Value& aRoot);
 
 	void sessionInitiation_Normal(const string& anUser);
+	void sessionInitiation_WrongPass(const string& anUser);
+	void sessionInitiation_WrongUser();
+	void sessionInitiation_MissingPara();
+	void sessionInitiation_Skipped();
+
 	void addSubscriber_Normal(const string& aNumber, const string& aStatus);
+	void addSubscriber_MissingPara();
 	void getSubscriberList_Normal(const string& aStatus);
 
 private:

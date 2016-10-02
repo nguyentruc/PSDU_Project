@@ -1,7 +1,7 @@
 /*
- * test_story0014.cpp
+ * test_story0014_3.cpp
  *
- *  Created on: Sep 30, 2016
+ *  Created on: Oct 2, 2016
  *      Author: trucndt
  */
 
@@ -16,11 +16,11 @@ int main(int argc, char **argv)
 		return 0;
 	}
 
-	string user = "admin";
-
 	ClientSimulator client;
-	client.connectToServer();
-	client.sessionInitiation_Normal(user);
+	client.connectToPSDU();
+	client.sessionInitiation_WrongPass("admin");
 	client.receive();
 	return 0;
 }
+
+

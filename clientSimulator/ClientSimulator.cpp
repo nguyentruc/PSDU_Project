@@ -19,7 +19,7 @@ ClientSimulator::~ClientSimulator()
 	close(mSock);
 }
 
-void ClientSimulator::connectToServer()
+void ClientSimulator::connectToPSDU()
 {
     struct sockaddr_rc servAddr;
 
@@ -45,7 +45,7 @@ void ClientSimulator::sessionInitiation_Normal(const string& anUser)
 {
 	Json::Value root;
 
-	printf("Command: Session Initiation\n");
+	printf("COMMAND: Session Initiation\n");
 
 	root["action"] = "SessionInitiation";
 
@@ -60,74 +60,32 @@ void ClientSimulator::sessionInitiation_Normal(const string& anUser)
 		root["pass"] = "";
 	}
 
-	Json::FastWriter writer;
-	string outMsg = writer.write(root);
-
-	cout << "outMsg's size = " << outMsg.size() << endl;
-	cout << "outMsg = " << outMsg << endl;
-
-	if (send(mSock, outMsg.c_str(), outMsg.size() + 1, 0) != outMsg.size() + 1)
-	{
-		cout << "send() failed from: " << __FILE__ << ":" << __LINE__ << endl;
-	}
-
-	Json::StyledWriter writerStyle;
-	string rcvMsg = writerStyle.write(root);
-
-	printf("JSON: %s\n", rcvMsg.c_str());
+	sendToPSDU(root);
 }
 
 void ClientSimulator::addSubscriber_Normal(const string& aNumber, const string& aStatus)
 {
 	Json::Value root;
 
-	printf("Command: Add Subscriber (Normal)\n");
+	printf("COMMAND: Add Subscriber (Normal)\n");
 
 	root["action"] = "AddSubscriber";
 	root["status"] = aStatus;
 	root["phone"] = aNumber;
 
-	Json::FastWriter writer;
-	string outMsg = writer.write(root);
-
-	cout << "outMsg's size = " << outMsg.size() << endl;
-	cout << "outMsg = " << outMsg << endl;
-
-	if (send(mSock, outMsg.c_str(), outMsg.size() + 1, 0) != outMsg.size() + 1)
-	{
-		cout << "send() failed from: " << __FILE__ << ":" << __LINE__ << endl;
-	}
-
-	Json::StyledWriter writerStyle;
-	string rcvMsg = writerStyle.write(root);
-
-	printf("JSON: %s\n", rcvMsg.c_str());
+	sendToPSDU(root);
 }
 
 void ClientSimulator::getSubscriberList_Normal(const string& aStatus)
 {
 	Json::Value root;
 
-	printf("Command: Get Subscriber List (Normal)\n");
+	printf("COMMAND: Get Subscriber List (Normal)\n");
 
 	root["action"] = "GetSubscriberList";
 	root["status"] = aStatus;
 
-	Json::FastWriter writer;
-	string outMsg = writer.write(root);
-
-	cout << "outMsg's size = " << outMsg.size() << endl;
-	cout << "outMsg = " << outMsg << endl;
-
-	if (send(mSock, outMsg.c_str(), outMsg.size() + 1, 0) != outMsg.size() + 1)
-	{
-		cout << "send() failed from: " << __FILE__ << ":" << __LINE__ << endl;
-	}
-
-	Json::StyledWriter writerStyle;
-	string rcvMsg = writerStyle.write(root);
-
-	printf("JSON: %s\n", rcvMsg.c_str());
+	sendToPSDU(root);
 }
 
 void ClientSimulator::receive()
@@ -144,7 +102,7 @@ void ClientSimulator::receive()
 	}
 	rcvBuffer[rcvMsgSize] = NULL;
 
-	printf("Received %d: %s\n", rcvMsgSize, rcvBuffer);
+	printf("RECEIVED %d: %s\n", rcvMsgSize, rcvBuffer);
 
 	Json::Reader reader;
 	Json::Value root;
@@ -196,4 +154,84 @@ int processCommandLineArgument(int argc, char **argv)
 	return 0;
 }
 
+void ClientSimulator::addSubscriber_MissingPara()
+{
+	Json::Value root;
 
+	printf("COMMAND: Add Subscriber (Missing parameters)\n");
+
+	root["action"] = "AddSubscriber";
+
+	sendToPSDU(root);
+}
+
+void ClientSimulator::sessionInitiation_WrongPass(const string& anUser)
+{
+	Json::Value root;
+
+	printf("COMMAND: Session Initiation (Wrong password)\n");
+
+	root["action"] = "SessionInitiation";
+
+	if (anUser == "admin")
+	{
+		root["user"] = "admin";
+		root["pass"] = "vcxvcxv";
+	}
+	else
+	{
+		root["user"] = "subscriber";
+		root["pass"] = "fdhsfkjdfhdkj";
+	}
+
+	sendToPSDU(root);
+}
+
+void ClientSimulator::sessionInitiation_WrongUser()
+{
+	Json::Value root;
+
+	printf("COMMAND: Session Initiation (Wrong password)\n");
+
+	root["action"] = "SessionInitiation";
+	root["user"] = "adm1n";
+	root["pass"] = "vcxvcxv";
+
+	sendToPSDU(root);
+}
+
+void ClientSimulator::sessionInitiation_MissingPara()
+{
+	Json::Value root;
+
+	printf("COMMAND: Session Initiation (Wrong password)\n");
+
+	root["action"] = "SessionInitiation";
+	root["user"] = "admin";
+
+	sendToPSDU(root);
+}
+
+void ClientSimulator::sessionInitiation_Skipped()
+{
+	addSubscriber_Normal("01257780872", "Power");
+}
+
+void ClientSimulator::sendToPSDU(const Json::Value& aRoot)
+{
+	Json::FastWriter writer;
+	string outMsg = writer.write(aRoot);
+
+	cout << "outMsg's size = " << outMsg.size() << endl;
+	cout << "outMsg = " << outMsg << endl;
+
+	if (send(mSock, outMsg.c_str(), outMsg.size() + 1, 0) != outMsg.size() + 1)
+	{
+		cout << "send() failed from: " << __FILE__ << ":" << __LINE__ << endl;
+	}
+
+	Json::StyledWriter writerStyle;
+	string rcvMsg = writerStyle.write(aRoot);
+
+	printf("JSON: %s\n", rcvMsg.c_str());
+}

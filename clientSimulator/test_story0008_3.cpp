@@ -1,7 +1,7 @@
 /*
- * test_storyUnknown.cpp
+ * test_story0008_3.cpp
  *
- *  Created on: Sep 30, 2016
+ *  Created on: Oct 2, 2016
  *      Author: trucndt
  */
 
@@ -20,14 +20,9 @@ int main(int argc, char **argv)
 	client.connectToPSDU();
 	client.sessionInitiation_Normal("admin");
 	client.receive();
-	client.addSubscriber_Normal("01257780872", "Power");
+	client.addSubscriber_Normal("01257780872","aaaaa");
 	client.receive();
-	client.addSubscriber_Normal("01257780871", "Power");
-	client.receive();
-	client.addSubscriber_Normal("01257780873", "Power");
-	client.receive();
-	client.getSubscriberList_Normal("Power");
-	client.receive();
-
 	return 0;
 }
+
+
