@@ -128,8 +128,8 @@ void Aggregator::notifySubscribers(int aStatusId, bool aValue)
 	Json::FastWriter writer;
 	string outMsg = writer.write(root);
 
-	cout << "outMsg = " << outMsg << endl;
 	cout << "outMsg's size = " << outMsg.size() << endl;
+	cout << "outMsg = " << outMsg << endl;
 
 	for (list<string>::const_iterator it = subscriberList.begin(); it != subscriberList.end(); ++it)
 	{

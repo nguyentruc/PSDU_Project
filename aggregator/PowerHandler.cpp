@@ -34,7 +34,7 @@ void PowerHandler::powerHdl()
 	char buf[10];
 	struct pollfd fdset;
 
-	pinPwr.setEdge("falling");
+	pinPwr.setEdge("both");
 
 //	for (;;)
 //	{
@@ -81,8 +81,18 @@ void PowerHandler::powerHdl()
 		{
 			lseek(gpioFd, 0, SEEK_SET);    /* consume interrupt */
 			read(gpioFd, buf, sizeof buf);
-			cout << "poll() GPIO " << mPIN_NUM << " interrupt occurred\n";
-			mAggregator->notifySubscribers(POWER_STATUS, false);
+
+			cout << "poll() GPIO " << mPIN_NUM << " interrupt occurred " << buf[0] << endl;
+
+			/* Check the current power status */
+			if (buf[0] == '0')
+			{
+				mAggregator->notifySubscribers(POWER_STATUS, false);
+			}
+			else
+			{
+				mAggregator->notifySubscribers(POWER_STATUS, true);
+			}
 		}
 	}
 }
