@@ -238,6 +238,7 @@ void ClientBLE::clientHandler()
 		cout << "recv() failed from: " << __FILE__ << ":" << __LINE__ << endl;
 		cout << "rcvMsgSize = " << rcvMsgSize << endl;
 
+		close(mSockFd);
 		delete this;
 		return;
 	}
@@ -249,6 +250,7 @@ void ClientBLE::clientHandler()
 	{
 		cout << "Cannot initiate connection\n";
 
+		close(mSockFd);
 		delete this;
 		return;
 	}
@@ -261,6 +263,7 @@ void ClientBLE::clientHandler()
 			cout << "recv() failed from: " << __FILE__ << ":" << __LINE__ << endl;
 			cout << "rcvMsgSize = " << rcvMsgSize << endl;
 
+			close(mSockFd);
 			delete this;
 			return;
 		}
