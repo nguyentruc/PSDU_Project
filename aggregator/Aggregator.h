@@ -38,6 +38,8 @@ public:
 	void addSubscriber(int aStatusId, const string& aPhoneNum);
 	bool compareAdminPwd(const string& anAdminPwd);
 	bool compareSubscriberPwd(const string& aSubscriberPwd);
+	void setAdminPwd(const string& anAdminPwd);
+	void setSubscriberPwd(const string& aSubscriberPwd);
 	void notifySubscribers(int aStatusId, bool aValue);
 	list<string> getSubscriberList(int aStatusId);
 

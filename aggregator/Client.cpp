@@ -159,6 +159,42 @@ int Client::getSubscriberListHdl(Json::Value& aRoot)
 	return ret;
 }
 
+int Client::changeAccPwdHdl(Json::Value& aRoot)
+{
+	Json::Value response;
+	int8_t ret = 0;
+
+	list<string> subscriberList;
+
+	response["result"] = "SUCCESS";
+	response["desc"] = "Password changed";
+
+	if (aRoot.isMember("user") == false || aRoot.isMember("newpass") == false)
+	{
+		ret = -1;
+	}
+	else if (aRoot["user"] == "admin")
+	{
+		mAggregator->setAdminPwd(aRoot["newpass"].asString());
+	}
+	else if (aRoot["user"] == "subscriber")
+	{
+		mAggregator->setSubscriberPwd(aRoot["newpass"].asString());
+	}
+	else ret = -2;
+
+	if (ret < 0)
+	{
+		response["result"] = "FAILED";
+		if (ret == -1) response["desc"] = "Parameter missing";
+		else if (ret == -2) response["desc"] = "Wrong user";
+	}
+
+	sendToClient(response);
+
+	return ret;
+}
+
 int Client::receivedCmdHandler(const char* aRcvMsg, int aRcvMsgSize)
 {
 	Json::Reader reader;
@@ -174,9 +210,13 @@ int Client::receivedCmdHandler(const char* aRcvMsg, int aRcvMsgSize)
 	{
 		return addSubscriberHdl(root);
 	}
-	if (root["action"] == "GetSubscriberList")
+	else if (root["action"] == "GetSubscriberList")
 	{
 		return getSubscriberListHdl(root);
+	}
+	else if (root["action"] == "ChangePassword")
+	{
+		return changeAccPwdHdl(root);
 	}
 	else
 	{

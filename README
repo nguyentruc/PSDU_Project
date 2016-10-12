@@ -1,8 +1,12 @@
-Usage: (Requires cmake)
+Usage: (Requires cmake, libbluetooth, libboost)
   $ mkdir build
   $ cd build
   $ cmake ..
   $ make aggregator
+
+Execute:
+  $ export LD_LIBRARY_PATH=shared_lib  #if don't have libboost
+  $ ./aggregator -s /dev/ttyUSB0
 
 Automation cross-compiling
   $ cd crossCompile
@@ -15,4 +19,8 @@ Create rfcomm socket:
   server: rfcomm watch hci0 <channel>
   client: rfcomm connect <addr> <channel>
 
-
+Testing (with Intel Edison):
+  $ git checkout clientSim
+  $ cd clientSimulator
+  $ mkdir build; cd build; cmake ..; make; cd ..
+  $ ./runTest build/{Test_bin}

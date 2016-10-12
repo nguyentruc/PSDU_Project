@@ -105,6 +105,20 @@ bool Aggregator::compareSubscriberPwd(const string& aSubscriberPwd)
 	return (aSubscriberPwd == mSubscriberPwd);
 }
 
+void Aggregator::setAdminPwd(const string& anAdminPwd)
+{
+	boost::lock_guard<boost::mutex> guard(mMtx_AdminPwd);
+
+	mAdminPwd = anAdminPwd;
+}
+
+void Aggregator::setSubscriberPwd(const string& aSubscriberPwd)
+{
+	boost::lock_guard<boost::mutex> guard(mMtx_SubscriberPwd);
+
+	mSubscriberPwd = aSubscriberPwd;
+}
+
 void Aggregator::notifySubscribers(int aStatusId, bool aValue)
 {
 	const list<string>& subscriberList = getSubscriberList(aStatusId); //need to double-check thread safe
