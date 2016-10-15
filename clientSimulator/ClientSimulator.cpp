@@ -235,3 +235,41 @@ void ClientSimulator::sendToPSDU(const Json::Value& aRoot)
 
 	printf("JSON: %s\n", rcvMsg.c_str());
 }
+
+void ClientSimulator::changeAccPwd_Normal(const string& aNewPass)
+{
+	Json::Value root;
+
+	printf("COMMAND: Change Account Password (Normal)\n");
+
+	root["action"] = "ChangePassword";
+	root["user"] = "subscriber";
+	root["newpass"] = aNewPass;
+
+	sendToPSDU(root);
+}
+
+void ClientSimulator::changeAccPwd_MissingPara()
+{
+	Json::Value root;
+
+	printf("COMMAND: Change Account Password (Missing parameters)\n");
+
+	root["action"] = "ChangePassword";
+	root["user"] = "subscriber";
+
+	sendToPSDU(root);
+}
+
+void ClientSimulator::changeAccPwd_WrongUser()
+{
+	Json::Value root;
+
+	printf("COMMAND: Change Account Password (Normal)\n");
+
+	root["action"] = "ChangePassword";
+	root["user"] = "abc";
+	root["newpass"] = "";
+
+	sendToPSDU(root);
+}

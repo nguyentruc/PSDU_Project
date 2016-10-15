@@ -35,6 +35,10 @@ public:
 	void addSubscriber_MissingPara();
 	void getSubscriberList_Normal(const string& aStatus);
 
+	void changeAccPwd_Normal(const string& aNewPass);
+	void changeAccPwd_MissingPara();
+	void changeAccPwd_WrongUser();
+
 private:
 	int mSock;
 };
