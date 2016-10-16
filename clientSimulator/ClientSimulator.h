@@ -34,6 +34,9 @@ public:
 	void addSubscriber_Normal(const string& aNumber, const string& aStatus);
 	void addSubscriber_MissingPara();
 
+	void delSubscriber_Normal(const string& aNumber, const string& aStatus);
+	void delSubscriber_MissingPara();
+
 	void getSubscriberList_Normal(const string& aStatus);
 	void getSubscriberList_MissingPara();
 

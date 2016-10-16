@@ -284,3 +284,28 @@ void ClientSimulator::getSubscriberList_MissingPara()
 
 	sendToPSDU(root);
 }
+
+void ClientSimulator::delSubscriber_Normal(const string& aNumber,
+		const string& aStatus)
+{
+	Json::Value root;
+
+	printf("COMMAND: Delete Subscriber (Normal)\n");
+
+	root["action"] = "DelSubscriber";
+	root["status"] = aStatus;
+	root["phone"] = aNumber;
+
+	sendToPSDU(root);
+}
+
+void ClientSimulator::delSubscriber_MissingPara()
+{
+	Json::Value root;
+
+	printf("COMMAND: Delete Subscriber (Missing parameters)\n");
+
+	root["action"] = "DelSubscriber";
+
+	sendToPSDU(root);
+}
