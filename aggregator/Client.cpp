@@ -39,6 +39,15 @@ int Client::subscribe(const string& aStatus, const string& aPhoneNum)
 
 int Client::unSubscribe(const string& aStatus, const string& aPhoneNum)
 {
+	if (aStatus == "Power")
+	{
+		mAggregator->delSubscriber(POWER_STATUS, aPhoneNum);
+	}
+	else
+	{
+		return -1;
+	}
+
 	return 0;
 }
 
@@ -210,6 +219,10 @@ int Client::receivedCmdHandler(const char* aRcvMsg, int aRcvMsgSize)
 	{
 		return addSubscriberHdl(root);
 	}
+	else if (root["action"] == "DelSubscriber")
+	{
+		return delSubscriberHdl(root);
+	}
 	else if (root["action"] == "GetSubscriberList")
 	{
 		return getSubscriberListHdl(root);
@@ -248,6 +261,35 @@ int Client::addSubscriberHdl(Json::Value &aRoot)
 	}
 
 	ret = sendToClient(response);
+
+	return ret;
+}
+
+int Client::delSubscriberHdl(Json::Value &aRoot)
+{
+	Json::Value response;
+	int8_t ret = 0;
+
+	response["result"] = "SUCCESS";
+	response["desc"] = "Deleted";
+
+	if (aRoot.isMember("status") == false || aRoot.isMember("phone") == false)
+	{
+		ret = -1;
+	}
+	else if (unSubscribe(aRoot["status"].asString(), aRoot["phone"].asString()) < 0)
+	{
+		ret = -2;
+	}
+
+	if (ret < 0)
+	{
+		response["result"] = "FAILED";
+		if (ret == -1) response["desc"] = "Parameter missing";
+		else if (ret == -2) response["desc"] = string(aRoot["status"].asString() + " is not supported");
+	}
+
+	sendToClient(response);
 
 	return ret;
 }

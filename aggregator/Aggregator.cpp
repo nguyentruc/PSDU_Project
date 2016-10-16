@@ -91,6 +91,13 @@ void Aggregator::addSubscriber(int aStatusId, const string& aPhoneNum)
 	mSubscriberList[aStatusId].push_back(aPhoneNum);
 }
 
+void Aggregator::delSubscriber(int aStatusId, const string& aPhoneNum)
+{
+	boost::lock_guard<boost::mutex> guard(mMtx_SubscriberList);
+
+	mSubscriberList[aStatusId].remove(aPhoneNum);
+}
+
 bool Aggregator::compareAdminPwd(const string& anAdminPwd)
 {
 	boost::lock_guard<boost::mutex> guard(mMtx_AdminPwd);

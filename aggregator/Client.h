@@ -29,6 +29,7 @@ protected:
 
 	int sessionInitiation(const char* aRcvMsg, int aRcvMsgSize);
 	int addSubscriberHdl(Json::Value &aRoot);
+	int delSubscriberHdl(Json::Value &aRoot);
 	int getSubscriberListHdl(Json::Value &aRoot);
 	int changeAccPwdHdl(Json::Value &aRoot);
 
