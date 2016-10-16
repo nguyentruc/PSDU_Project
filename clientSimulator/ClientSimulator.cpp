@@ -309,3 +309,53 @@ void ClientSimulator::delSubscriber_MissingPara()
 
 	sendToPSDU(root);
 }
+
+void ClientSimulator::subscribe_Normal(const string& aNumber,
+		const string& aStatus)
+{
+	Json::Value root;
+
+	printf("COMMAND: Subscribe (Normal)\n");
+
+	root["action"] = "Subscribe";
+	root["status"] = aStatus;
+	root["phone"] = aNumber;
+
+	sendToPSDU(root);
+}
+
+void ClientSimulator::subscribe_MissingPara()
+{
+	Json::Value root;
+
+	printf("COMMAND: Subscribe (Missing parameters)\n");
+
+	root["action"] = "Subscribe";
+
+	sendToPSDU(root);
+}
+
+void ClientSimulator::unsubscribe_Normal(const string& aNumber,
+		const string& aStatus)
+{
+	Json::Value root;
+
+	printf("COMMAND: Unsubscribe (Normal)\n");
+
+	root["action"] = "Unsubscribe";
+	root["status"] = aStatus;
+	root["phone"] = aNumber;
+
+	sendToPSDU(root);
+}
+
+void ClientSimulator::unsubscribe_MissingPara()
+{
+	Json::Value root;
+
+	printf("COMMAND: Unsubscribe (Missing parameters)\n");
+
+	root["action"] = "Unsubscribe";
+
+	sendToPSDU(root);
+}

@@ -44,6 +44,12 @@ public:
 	void changeAccPwd_MissingPara();
 	void changeAccPwd_WrongUser();
 
+	void subscribe_Normal(const string& aNumber, const string& aStatus);
+	void subscribe_MissingPara();
+
+	void unsubscribe_Normal(const string& aNumber, const string& aStatus);
+	void unsubscribe_MissingPara();
+
 private:
 	int mSock;
 };
