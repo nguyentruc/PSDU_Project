@@ -273,3 +273,14 @@ void ClientSimulator::changeAccPwd_WrongUser()
 
 	sendToPSDU(root);
 }
+
+void ClientSimulator::getSubscriberList_MissingPara()
+{
+	Json::Value root;
+
+	printf("COMMAND: Get Subscriber List (Missing parameters)\n");
+
+	root["action"] = "GetSubscriberList";
+
+	sendToPSDU(root);
+}

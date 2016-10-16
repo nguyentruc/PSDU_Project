@@ -29,23 +29,36 @@ set ( story_SRCS
 add_library(story_static STATIC ${story_SRCS})
 target_link_libraries(story_static ${LIBRARIES})
 
-set (	test_story0016_1_SRCS
-	test_story0016_1.cpp
+set (	test_story0017_1_SRCS
+	test_story0017_1.cpp
 )
-add_executable(test_story0016_1 ${test_story0016_1_SRCS})
-target_link_libraries(test_story0016_1 story_static)
+add_executable(test_story0017_1 ${test_story0017_1_SRCS})
+target_link_libraries(test_story0017_1 story_static)
 
-set (	test_story0016_2_SRCS
-	test_story0016_2.cpp
+set (	test_story0017_2_SRCS
+	test_story0017_2.cpp
 )
-add_executable(test_story0016_2 ${test_story0016_2_SRCS})
-target_link_libraries(test_story0016_2 story_static)
+add_executable(test_story0017_2 ${test_story0017_2_SRCS})
+target_link_libraries(test_story0017_2 story_static)
 
-set (	test_story0016_3_SRCS
-	test_story0016_3.cpp
-)
-add_executable(test_story0016_3 ${test_story0016_3_SRCS})
-target_link_libraries(test_story0016_3 story_static)
+
+# set (	test_story0016_1_SRCS
+# 	test_story0016_1.cpp
+# )
+# add_executable(test_story0016_1 ${test_story0016_1_SRCS})
+# target_link_libraries(test_story0016_1 story_static)
+
+# set (	test_story0016_2_SRCS
+# 	test_story0016_2.cpp
+# )
+# add_executable(test_story0016_2 ${test_story0016_2_SRCS})
+# target_link_libraries(test_story0016_2 story_static)
+
+# set (	test_story0016_3_SRCS
+# 	test_story0016_3.cpp
+# )
+# add_executable(test_story0016_3 ${test_story0016_3_SRCS})
+# target_link_libraries(test_story0016_3 story_static)
 
 # set (	test_story0014_1_SRCS
 # 	test_story0014_1.cpp

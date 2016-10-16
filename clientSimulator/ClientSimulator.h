@@ -33,7 +33,9 @@ public:
 
 	void addSubscriber_Normal(const string& aNumber, const string& aStatus);
 	void addSubscriber_MissingPara();
+
 	void getSubscriberList_Normal(const string& aStatus);
+	void getSubscriberList_MissingPara();
 
 	void changeAccPwd_Normal(const string& aNewPass);
 	void changeAccPwd_MissingPara();
