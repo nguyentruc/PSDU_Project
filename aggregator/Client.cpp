@@ -65,6 +65,16 @@ int Client::getSubscriberlist(const string& aStatus, list<string>& aSubscriberLi
 	return 0;
 }
 
+void Client::cmdNotPermitted()
+{
+	Json::Value response;
+
+	response["result"] = "FAILED";
+	response["desc"] = "Command not permitted";
+
+	sendToClient(response);
+}
+
 int Client::sessionInitiation(const char* aRcvMsg, int aRcvMsgSize)
 {
 	Json::Value response, root;
@@ -99,7 +109,7 @@ int Client::sessionInitiation(const char* aRcvMsg, int aRcvMsgSize)
 			{
 				ret = -1;
 			}
-			else mUser = 1;
+			else mUser = ADMIN;
 		}
 		else if (root["user"] == "subscriber")
 		{
@@ -107,7 +117,7 @@ int Client::sessionInitiation(const char* aRcvMsg, int aRcvMsgSize)
 			{
 				ret = -1;
 			}
-			else mUser = 0;
+			else mUser = SUBSCRIBER;
 		}
 		else // user doesn't match
 		{
@@ -217,19 +227,27 @@ int Client::receivedCmdHandler(const char* aRcvMsg, int aRcvMsgSize)
 
 	if (root["action"] == "AddSubscriber")
 	{
-		return addSubscriberHdl(root);
+		if (mUser != ADMIN) cmdNotPermitted();
+		else return addSubscriberHdl(root);
 	}
 	else if (root["action"] == "DelSubscriber")
 	{
-		return delSubscriberHdl(root);
+		if (mUser != ADMIN) cmdNotPermitted();
+		else return delSubscriberHdl(root);
 	}
 	else if (root["action"] == "GetSubscriberList")
 	{
-		return getSubscriberListHdl(root);
+		if (mUser != ADMIN) cmdNotPermitted();
+		else return getSubscriberListHdl(root);
 	}
 	else if (root["action"] == "ChangePassword")
 	{
-		return changeAccPwdHdl(root);
+		if (mUser != ADMIN) cmdNotPermitted();
+		else return changeAccPwdHdl(root);
+	}
+	else if (root["action"] == "Subscribe")
+	{
+		return subscribeHdl(root);
 	}
 	else
 	{
@@ -272,6 +290,64 @@ int Client::delSubscriberHdl(Json::Value &aRoot)
 
 	response["result"] = "SUCCESS";
 	response["desc"] = "Deleted";
+
+	if (aRoot.isMember("status") == false || aRoot.isMember("phone") == false)
+	{
+		ret = -1;
+	}
+	else if (unSubscribe(aRoot["status"].asString(), aRoot["phone"].asString()) < 0)
+	{
+		ret = -2;
+	}
+
+	if (ret < 0)
+	{
+		response["result"] = "FAILED";
+		if (ret == -1) response["desc"] = "Parameter missing";
+		else if (ret == -2) response["desc"] = string(aRoot["status"].asString() + " is not supported");
+	}
+
+	sendToClient(response);
+
+	return ret;
+}
+
+int Client::subscribeHdl(Json::Value &aRoot)
+{
+	Json::Value response;
+	int8_t ret = 0;
+
+	response["result"] = "SUCCESS";
+	response["desc"] = "Subscribed";
+
+	if (aRoot.isMember("status") == false || aRoot.isMember("phone") == false)
+	{
+		ret = -1;
+	}
+	else if (subscribe(aRoot["status"].asString(), aRoot["phone"].asString()) < 0)
+	{
+		ret = -2;
+	}
+
+	if (ret < 0)
+	{
+		response["result"] = "FAILED";
+		if (ret == -1) response["desc"] = "Parameter missing";
+		else if (ret == -2) response["desc"] = string(aRoot["status"].asString() + " is not supported");
+	}
+
+	sendToClient(response);
+
+	return ret;
+}
+
+int Client::unSubscribeHdl(Json::Value &aRoot)
+{
+	Json::Value response;
+	int8_t ret = 0;
+
+	response["result"] = "SUCCESS";
+	response["desc"] = "Unsubscribed";
 
 	if (aRoot.isMember("status") == false || aRoot.isMember("phone") == false)
 	{

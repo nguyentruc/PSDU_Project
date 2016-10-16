@@ -25,13 +25,8 @@ public:
 
 protected:
 	Aggregator *mAggregator;
-	uint8_t mUser;// mode = 0: subscriber ; mode = 1: admin
 
 	int sessionInitiation(const char* aRcvMsg, int aRcvMsgSize);
-	int addSubscriberHdl(Json::Value &aRoot);
-	int delSubscriberHdl(Json::Value &aRoot);
-	int getSubscriberListHdl(Json::Value &aRoot);
-	int changeAccPwdHdl(Json::Value &aRoot);
 
 	int receivedCmdHandler(const char* aRcvMsg, int aRcvMsgSize);
 
@@ -39,9 +34,23 @@ protected:
 	virtual int sendToClient(const Json::Value& aRoot) {return -1; };
 
 private:
+	uint8_t mUser;
+	const static uint8_t ADMIN = 1;
+	const static uint8_t SUBSCRIBER = 0;
+
 	int subscribe(const string& aStatus, const string& aPhoneNum);
 	int unSubscribe(const string& aStatus, const string& aPhoneNum);
 	int getSubscriberlist(const string& aStatus, list<string>& aSubscriberList);
+
+	int addSubscriberHdl(Json::Value &aRoot);
+	int delSubscriberHdl(Json::Value &aRoot);
+	int getSubscriberListHdl(Json::Value &aRoot);
+	int changeAccPwdHdl(Json::Value &aRoot);
+
+	int subscribeHdl(Json::Value &aRoot);
+	int unSubscribeHdl(Json::Value &aRoot);
+
+	void cmdNotPermitted();
 };
 
 class ClientBLE: public Client
