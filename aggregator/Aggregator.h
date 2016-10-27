@@ -27,6 +27,9 @@ extern po::variables_map gPROG_ARGUMENT;
 using namespace std;
 
 const int POWER_STATUS = 0;
+const int CAMERA_STATUS = 1;
+const int THIEF_STATUS = 2;
+const int NUM_OF_STATUS = 3;
 
 class Aggregator
 {
@@ -47,6 +50,8 @@ public:
 	void notifySubscribers(int aStatusId, bool aValue);
 	list<string> getSubscriberList(int aStatusId);
 
+	uint8_t getStatus(int8_t aStatusId);
+
 private:
 	GSM *mGSMHdl;
 	PowerHandler *mPowerHdl;
@@ -55,11 +60,16 @@ private:
 	map<int, list<string> > mSubscriberList;
 	boost::mutex mMtx_SubscriberList;
 
+	vector<uint8_t> mStatus;
+	boost::mutex mMtx_Status;
+
 	string mAdminPwd;
 	boost::mutex mMtx_AdminPwd;
 
 	string mSubscriberPwd;
 	boost::mutex mMtx_SubscriberPwd;
+
+	void setStatus(int8_t aStatusId, uint8_t aValue);
 };
 
 #endif /* AGGREGATOR_AGGREGATOR_H_ */

@@ -9,6 +9,7 @@
 
 Aggregator::Aggregator()
 {
+	mStatus.resize(NUM_OF_STATUS);
 	mGSMHdl = new GSM(this, gPROG_ARGUMENT["serialDevice"].as<string>().c_str(),
 			gPROG_ARGUMENT["baudrate"].as<int>());
 	mPowerHdl = new PowerHandler(this);
@@ -136,6 +137,9 @@ void Aggregator::notifySubscribers(int aStatusId, bool aValue)
 
 	cout << "Notify " << subscriberList.size() << " clients" << endl;
 
+	/* Update status */
+	setStatus(aStatusId, aValue);
+
 	/* Construct JSON */
 	Json::Value root;
 
@@ -163,4 +167,18 @@ list<string> Aggregator::getSubscriberList(int aStatusId)
 	boost::lock_guard<boost::mutex> guard(mMtx_SubscriberList);
 
 	return mSubscriberList[aStatusId];
+}
+
+uint8_t Aggregator::getStatus(int8_t aStatusId)
+{
+	boost::lock_guard<boost::mutex> guard(mMtx_Status);
+
+	return mStatus[aStatusId];
+}
+
+void Aggregator::setStatus(int8_t aStatusId, uint8_t aValue)
+{
+	boost::lock_guard<boost::mutex> guard(mMtx_Status);
+
+	mStatus[aStatusId] = aValue;
 }

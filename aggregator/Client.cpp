@@ -249,6 +249,10 @@ int Client::receivedCmdHandler(const char* aRcvMsg, int aRcvMsgSize)
 	{
 		return subscribeHdl(root);
 	}
+	else if (root["action"] == "Update")
+	{
+		return updateSttHdl(root);
+	}
 	else
 	{
 		cout << "ERR: Invalid command: " << aRcvMsg << endl;
@@ -370,6 +374,38 @@ int Client::unSubscribeHdl(Json::Value &aRoot)
 	return ret;
 }
 
+int Client::updateSttHdl(Json::Value& aRoot)
+{
+	Json::Value response;
+	int8_t ret = 0;
+
+	response["result"] = "SUCCESS";
+
+	if (aRoot.isMember("pass") == false)
+	{
+		ret = -1;
+	}
+	else if (mAggregator->compareSubscriberPwd(aRoot["pass"].asString()) == false)
+	{
+		ret = -2;
+	}
+
+	if (ret < 0)
+	{
+		response["result"] = "FAILED";
+	}
+	else
+	{
+		response["val"]["Power"] = (bool) mAggregator->getStatus(POWER_STATUS);
+		response["val"]["Camera"] = (bool) mAggregator->getStatus(CAMERA_STATUS); // num of camera?
+		response["val"]["Thief"] = (bool) mAggregator->getStatus(THIEF_STATUS);
+	}
+
+	sendToClient(response);
+
+	return ret;
+}
+
 ClientBLE::ClientBLE(Aggregator* anAggregator, int aSockFd)
 {
 	mAggregator = anAggregator;
@@ -450,11 +486,13 @@ int ClientBLE::sendToClient(const Json::Value& aRoot)
 	return 0;
 }
 
-ClientGSM::ClientGSM(Aggregator *anAggregator, const string& aMessage, const string& aPhoneNum)
+ClientGSM::ClientGSM(Aggregator *anAggregator, const string& aMessage, const string& aPhoneNum,
+		GSM *aGSM)
 {
 	mAggregator = anAggregator;
 	mMessage = aMessage;
 	mPhoneNum = aPhoneNum;
+	mGSM = aGSM;
 }
 
 ClientGSM::~ClientGSM()
@@ -466,12 +504,24 @@ void ClientGSM::clientHandler()
 	pthread_setname_np(pthread_self(), "GSM");
 	cout << "GSM Handler\n";
 
-	//TODO: Handle subscribers
+	receivedCmdHandler(mMessage.c_str(), mMessage.size());
 
 	delete this;
 }
 
 int ClientGSM::sendToClient(const Json::Value& aRoot)
 {
+	Json::FastWriter writer;
+	string outMsg = writer.write(aRoot);
+
+	cout << "outMsg's size = " << outMsg.size() << endl;
+	cout << "outMsg = " << outMsg << endl;
+
+	if (mGSM->sendSms(mPhoneNum, outMsg.c_str()) == 0)
+	{
+		cout << "sendSms() failed from: " << __FILE__ << ":" << __LINE__ << endl;
+		return -1;
+	}
+
 	return 0;
 }

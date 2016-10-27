@@ -108,12 +108,18 @@ void GSM::GSMHandler()
 				mIsOk = 1;
 				mCv_IsOk.notify_all();
 			}
+			else if (rcvMsg.find("ERROR") != string::npos)
+			{
+				boost::unique_lock<boost::mutex> uniLck(mMtx_IsOk);
+				mIsOk = 0;
+				mCv_IsOk.notify_all();
+			}
 			break;
 		case 1: // get sms body
 			cout << "From phone number: " << phoneNum << endl;
 			cout << "Received sms: " << rcvMsg << endl;
 
-			ClientGSM *client = new ClientGSM(mAggregator, rcvMsg, phoneNum);
+			ClientGSM *client = new ClientGSM(mAggregator, rcvMsg, phoneNum, this);
 			client->start();
 
 			state = 0;

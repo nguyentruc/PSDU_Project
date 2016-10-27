@@ -14,6 +14,7 @@
 using namespace std;
 
 class Aggregator;
+class GSM;
 
 class Client
 {
@@ -49,6 +50,7 @@ private:
 
 	int subscribeHdl(Json::Value &aRoot);
 	int unSubscribeHdl(Json::Value &aRoot);
+	int updateSttHdl(Json::Value &aRoot);
 
 	void cmdNotPermitted();
 };
@@ -70,12 +72,14 @@ private:
 class ClientGSM: public Client
 {
 public:
-	ClientGSM(Aggregator *anAggregator, const string& aMessage, const string& aPhoneNum);
+	ClientGSM(Aggregator *anAggregator, const string& aMessage, const string& aPhoneNum,
+			GSM *aGSM);
 	~ClientGSM();
 
 private:
 	string mMessage;
 	string mPhoneNum;
+	GSM *mGSM;
 
 	void clientHandler();
 	int sendToClient(const Json::Value& aRoot);
