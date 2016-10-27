@@ -18,6 +18,12 @@
 #include <map>
 #include "GSM.h"
 
+#include <boost/archive/binary_oarchive.hpp>
+#include <boost/archive/binary_iarchive.hpp>
+#include <boost/serialization/string.hpp>
+#include <boost/serialization/map.hpp>
+#include <boost/serialization/list.hpp>
+
 class Client;
 class GSM;
 class PowerHandler;
@@ -25,6 +31,9 @@ class PowerHandler;
 extern po::variables_map gPROG_ARGUMENT;
 
 using namespace std;
+
+const string PASSWORD_CONFIG_FILE = "DATA0";
+const string SUBSCRIBERLIST_CONFIG_FILE = "DATA1";
 
 const int POWER_STATUS = 0;
 
@@ -48,7 +57,12 @@ public:
 	list<string> getSubscriberList(int aStatusId);
 
 private:
-	GSM *mGSMHdl;
+    void savePassword();
+    void saveSubscriberList();
+
+    void loadData();
+
+    GSM *mGSMHdl;
 	PowerHandler *mPowerHdl;
 
 	// Status id -> list of Client

@@ -14,6 +14,10 @@ Aggregator::Aggregator()
 	mPowerHdl = new PowerHandler(this);
 	mAdminPwd = "admin";
 	mSubscriberPwd = "";
+
+	//TODO: check file exist
+	savePassword();
+	saveSubscriberList();
 }
 
 void Aggregator::start()
@@ -89,6 +93,8 @@ void Aggregator::addSubscriber(int aStatusId, const string& aPhoneNum)
 	}
 
 	mSubscriberList[aStatusId].push_back(aPhoneNum);
+
+	saveSubscriberList();
 }
 
 void Aggregator::delSubscriber(int aStatusId, const string& aPhoneNum)
@@ -117,6 +123,8 @@ void Aggregator::setAdminPwd(const string& anAdminPwd)
 	boost::lock_guard<boost::mutex> guard(mMtx_AdminPwd);
 
 	mAdminPwd = anAdminPwd;
+
+	savePassword();
 }
 
 void Aggregator::setSubscriberPwd(const string& aSubscriberPwd)
@@ -124,6 +132,8 @@ void Aggregator::setSubscriberPwd(const string& aSubscriberPwd)
 	boost::lock_guard<boost::mutex> guard(mMtx_SubscriberPwd);
 
 	mSubscriberPwd = aSubscriberPwd;
+
+	savePassword();
 }
 
 void Aggregator::notifySubscribers(int aStatusId, bool aValue)
@@ -163,4 +173,39 @@ list<string> Aggregator::getSubscriberList(int aStatusId)
 	boost::lock_guard<boost::mutex> guard(mMtx_SubscriberList);
 
 	return mSubscriberList[aStatusId];
+}
+
+void Aggregator::savePassword()
+{
+	ofstream ofs(PASSWORD_CONFIG_FILE.c_str());
+	boost::archive::binary_oarchive oa(ofs);
+
+	oa << mAdminPwd;
+	oa << mSubscriberPwd;
+}
+
+void Aggregator::saveSubscriberList()
+{
+	ofstream ofs(SUBSCRIBERLIST_CONFIG_FILE.c_str());
+	boost::archive::binary_oarchive oa(ofs);
+
+	oa << mSubscriberList;
+}
+
+void Aggregator::loadData()
+{
+	/* Load Subscriber List */
+	ifstream ifsSubriberList(SUBSCRIBERLIST_CONFIG_FILE.c_str());
+	boost::archive::binary_iarchive iaSubscriberList(ifsSubriberList);
+
+	iaSubscriberList >> mSubscriberList;
+
+	/* Load Password */
+	ifstream ifsPassword(PASSWORD_CONFIG_FILE.c_str());
+	boost::archive::binary_iarchive iaPassword(ifsPassword);
+
+	iaPassword >> mAdminPwd;
+	iaPassword >> mSubscriberPwd;
+
+	//TODO: Load status
 }
