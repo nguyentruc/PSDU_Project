@@ -47,7 +47,7 @@ public:
 	void setAdminPwd(const string& anAdminPwd);
 	void setSubscriberPwd(const string& aSubscriberPwd);
 
-	void notifySubscribers(int aStatusId, bool aValue);
+	void notifySubscribers(int aStatusId, uint8_t aValue);
 	list<string> getSubscriberList(int aStatusId);
 
 	uint8_t getStatus(int8_t aStatusId);

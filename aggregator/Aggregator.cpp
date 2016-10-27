@@ -127,7 +127,7 @@ void Aggregator::setSubscriberPwd(const string& aSubscriberPwd)
 	mSubscriberPwd = aSubscriberPwd;
 }
 
-void Aggregator::notifySubscribers(int aStatusId, bool aValue)
+void Aggregator::notifySubscribers(int aStatusId, uint8_t aValue)
 {
 	const list<string>& subscriberList = getSubscriberList(aStatusId); //need to double-check thread safe
 	if (subscriberList.empty())
@@ -147,8 +147,8 @@ void Aggregator::notifySubscribers(int aStatusId, bool aValue)
 	if (aStatusId == POWER_STATUS)
 	{
 		root["status"] = "Power";
+		root["val"] = (bool) aValue;
 	}
-	root["val"] = aValue;
 
 	Json::FastWriter writer;
 	string outMsg = writer.write(root);
