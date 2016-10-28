@@ -9,6 +9,7 @@
 #define AGGREGATOR_POWERHANDLER_H_
 
 #include "Aggregator.h"
+#include "gpio/GPIO.h"
 
 class Aggregator;
 
@@ -19,9 +20,12 @@ public:
 	virtual ~PowerHandler();
 
 	void start();
+	uint8_t getValue();
 
 private:
 	Aggregator *mAggregator;
+
+	GPIO *mPinPwr;
 	static const int mPIN_NUM = 13;
 
 	void powerHdl();

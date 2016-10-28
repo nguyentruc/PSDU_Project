@@ -8,6 +8,9 @@ Execute:
   $ export LD_LIBRARY_PATH=shared_lib  #if don't have libboost
   $ ./aggregator -s /dev/ttyUSB0
 
+On startup, it will load two files DATA0 and DATA1 which are the initial configuration data. During program execution, these files will be updated many times. 
+If you want the program to start without any initial data, delete those files before execution.
+
 Automation cross-compiling
   $ cd crossCompile
   $ ./auto-cross-compile.sh <TARGET_USER> <TARGET_IP>

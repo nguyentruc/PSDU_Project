@@ -14,7 +14,13 @@ Aggregator::Aggregator()
 			gPROG_ARGUMENT["baudrate"].as<int>());
 	mPowerHdl = new PowerHandler(this);
 
+	/* Initialize data */
 	loadData();
+}
+
+void Aggregator::initStatus()
+{
+	mStatus[POWER_STATUS] = mPowerHdl->getValue();
 }
 
 void Aggregator::start()
@@ -246,8 +252,6 @@ void Aggregator::loadData()
 
 		savePassword();
 	}
-
-	//TODO: Load status
 }
 
 void Aggregator::printInternalDataStructure()

@@ -6,17 +6,17 @@
  */
 
 #include "PowerHandler.h"
-#include "gpio/GPIO.h"
 #include <poll.h>
 
 PowerHandler::PowerHandler(Aggregator *anAggregator)
 {
 	mAggregator = anAggregator;
+	mPinPwr = new GPIO(mPIN_NUM, 0);
 }
 
 PowerHandler::~PowerHandler()
 {
-	// TODO Auto-generated destructor stub
+	delete mPinPwr;
 }
 
 void PowerHandler::start()
@@ -24,17 +24,15 @@ void PowerHandler::start()
 	boost::thread(&PowerHandler::powerHdl, this);
 }
 
-
 void PowerHandler::powerHdl()
 {
 	pthread_setname_np(pthread_self(), "PowerHandler");
 
-	GPIO pinPwr = GPIO(mPIN_NUM, 0);
-	int gpioFd = pinPwr.getFd();
-	char buf[10];
+	int gpioFd = mPinPwr->getFd();
+	char buf[5];
 	struct pollfd fdset;
 
-	pinPwr.setEdge("both");
+	mPinPwr->setEdge("both");
 
 //	for (;;)
 //	{
@@ -95,4 +93,9 @@ void PowerHandler::powerHdl()
 			}
 		}
 	}
+}
+
+uint8_t PowerHandler::getValue()
+{
+	return mPinPwr->getValue();
 }

@@ -70,6 +70,7 @@ private:
 
     void printInternalDataStructure();
     void setStatus(int8_t aStatusId, uint8_t aValue);
+    void initStatus();
 
     GSM *mGSMHdl;
 	PowerHandler *mPowerHdl;
