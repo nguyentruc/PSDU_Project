@@ -29,6 +29,12 @@ set ( story_SRCS
 add_library(story_static STATIC ${story_SRCS})
 target_link_libraries(story_static ${LIBRARIES})
 
+set (	test_story0025_SRCS
+	test_story0025.cpp
+)
+add_executable(test_story0025 ${test_story0025_SRCS})
+target_link_libraries(test_story0025 story_static)
+
 set (	test_story0023_1_SRCS
 	test_story0023_1.cpp
 )
