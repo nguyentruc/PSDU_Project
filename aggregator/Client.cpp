@@ -10,7 +10,7 @@
 Client::Client()
 {
 	mAggregator = NULL;
-	mUser = 0;
+	mUser = 2;
 }
 
 Client::~Client()
@@ -257,11 +257,13 @@ int Client::receivedCmdHandler(const char* aRcvMsg, int aRcvMsgSize)
 	}
 	else if (root["action"] == "Subscribe")
 	{
-		return subscribeHdl(root);
+		if (mUser != SUBSCRIBER) cmdNotPermitted();
+		else return subscribeHdl(root);
 	}
 	else if (root["action"] == "Unsubscribe")
 	{
-		return unSubscribeHdl(root);
+		if (mUser != SUBSCRIBER) cmdNotPermitted();
+		else return unSubscribeHdl(root);
 	}
 	else if (root["action"] == "Update")
 	{
