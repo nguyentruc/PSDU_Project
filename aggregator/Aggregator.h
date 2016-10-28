@@ -18,6 +18,12 @@
 #include <map>
 #include "GSM.h"
 
+#include <boost/archive/binary_oarchive.hpp>
+#include <boost/archive/binary_iarchive.hpp>
+#include <boost/serialization/string.hpp>
+#include <boost/serialization/map.hpp>
+#include <boost/serialization/list.hpp>
+
 class Client;
 class GSM;
 class PowerHandler;
@@ -25,6 +31,9 @@ class PowerHandler;
 extern po::variables_map gPROG_ARGUMENT;
 
 using namespace std;
+
+const char PASSWORD_CONFIG_FILE[] = "DATA0";
+const char SUBSCRIBERLIST_CONFIG_FILE[] = "DATA1";
 
 const int POWER_STATUS = 0;
 const int CAMERA_STATUS = 1;
@@ -53,7 +62,16 @@ public:
 	uint8_t getStatus(int8_t aStatusId);
 
 private:
-	GSM *mGSMHdl;
+	/* Save configuration data to file */
+    void savePassword();
+    void saveSubscriberList();
+
+    void loadData(); //load configuration data from file
+
+    void printInternalDataStructure();
+    void setStatus(int8_t aStatusId, uint8_t aValue);
+
+    GSM *mGSMHdl;
 	PowerHandler *mPowerHdl;
 
 	// Status id -> list of Client
@@ -64,12 +82,8 @@ private:
 	boost::mutex mMtx_Status;
 
 	string mAdminPwd;
-	boost::mutex mMtx_AdminPwd;
-
 	string mSubscriberPwd;
-	boost::mutex mMtx_SubscriberPwd;
-
-	void setStatus(int8_t aStatusId, uint8_t aValue);
+	boost::mutex mMtx_Password; // use 1 mutex for 2 passwords to save memory
 };
 
 #endif /* AGGREGATOR_AGGREGATOR_H_ */

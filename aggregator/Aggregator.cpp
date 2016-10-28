@@ -13,8 +13,8 @@ Aggregator::Aggregator()
 	mGSMHdl = new GSM(this, gPROG_ARGUMENT["serialDevice"].as<string>().c_str(),
 			gPROG_ARGUMENT["baudrate"].as<int>());
 	mPowerHdl = new PowerHandler(this);
-	mAdminPwd = "admin";
-	mSubscriberPwd = "";
+
+	loadData();
 }
 
 void Aggregator::start()
@@ -76,6 +76,7 @@ void Aggregator::start()
 Aggregator::~Aggregator()
 {
 	delete mGSMHdl;
+	delete mPowerHdl;
 }
 
 void Aggregator::addSubscriber(int aStatusId, const string& aPhoneNum)
@@ -90,6 +91,8 @@ void Aggregator::addSubscriber(int aStatusId, const string& aPhoneNum)
 	}
 
 	mSubscriberList[aStatusId].push_back(aPhoneNum);
+
+	saveSubscriberList();
 }
 
 void Aggregator::delSubscriber(int aStatusId, const string& aPhoneNum)
@@ -101,30 +104,34 @@ void Aggregator::delSubscriber(int aStatusId, const string& aPhoneNum)
 
 bool Aggregator::compareAdminPwd(const string& anAdminPwd)
 {
-	boost::lock_guard<boost::mutex> guard(mMtx_AdminPwd);
+	boost::lock_guard<boost::mutex> guard(mMtx_Password);
 
 	return (anAdminPwd == mAdminPwd);
 }
 
 bool Aggregator::compareSubscriberPwd(const string& aSubscriberPwd)
 {
-	boost::lock_guard<boost::mutex> guard(mMtx_SubscriberPwd);
+	boost::lock_guard<boost::mutex> guard(mMtx_Password);
 
 	return (aSubscriberPwd == mSubscriberPwd);
 }
 
 void Aggregator::setAdminPwd(const string& anAdminPwd)
 {
-	boost::lock_guard<boost::mutex> guard(mMtx_AdminPwd);
+	boost::lock_guard<boost::mutex> guard(mMtx_Password);
 
 	mAdminPwd = anAdminPwd;
+
+	savePassword();
 }
 
 void Aggregator::setSubscriberPwd(const string& aSubscriberPwd)
 {
-	boost::lock_guard<boost::mutex> guard(mMtx_SubscriberPwd);
+	boost::lock_guard<boost::mutex> guard(mMtx_Password);
 
 	mSubscriberPwd = aSubscriberPwd;
+
+	savePassword();
 }
 
 void Aggregator::notifySubscribers(int aStatusId, uint8_t aValue)
@@ -181,4 +188,93 @@ void Aggregator::setStatus(int8_t aStatusId, uint8_t aValue)
 	boost::lock_guard<boost::mutex> guard(mMtx_Status);
 
 	mStatus[aStatusId] = aValue;
+}
+
+void Aggregator::savePassword()
+{
+	ofstream ofs(PASSWORD_CONFIG_FILE);
+	boost::archive::binary_oarchive oa(ofs);
+
+	oa << mAdminPwd;
+	oa << mSubscriberPwd;
+}
+
+void Aggregator::saveSubscriberList()
+{
+	ofstream ofs(SUBSCRIBERLIST_CONFIG_FILE);
+	boost::archive::binary_oarchive oa(ofs);
+
+	oa << mSubscriberList;
+}
+
+void Aggregator::loadData()
+{
+	/* Load Subscriber List */
+	ifstream ifsSubriberList(SUBSCRIBERLIST_CONFIG_FILE);
+	if (ifsSubriberList.good())
+	{
+		cout << "Subscriber list data exist, loading ...\n";
+
+		boost::archive::binary_iarchive iaSubscriberList(ifsSubriberList);
+		iaSubscriberList >> mSubscriberList;
+
+		printInternalDataStructure();
+	}
+	else
+	{
+		cout << "Subscriber list data not found, creating one ...\n";
+		saveSubscriberList();
+	}
+
+	/* Load Password */
+	ifstream ifsPassword(PASSWORD_CONFIG_FILE);
+
+	if (ifsPassword.good())
+	{
+		cout << "Password data exist, loading ...\n";
+
+		boost::archive::binary_iarchive iaPassword(ifsPassword);
+
+		iaPassword >> mAdminPwd;
+		iaPassword >> mSubscriberPwd;
+	}
+	else
+	{
+		cout << "Password data not found, creating one ...\n";
+		mAdminPwd = "admin"; // default
+		mSubscriberPwd = "";
+
+		savePassword();
+	}
+
+	//TODO: Load status
+}
+
+void Aggregator::printInternalDataStructure()
+{
+	boost::lock_guard<boost::mutex> guard(mMtx_SubscriberList);
+
+	map<int, list<string> >::const_iterator subscriberListItr;
+	list<string>::const_iterator listItr;
+
+	cout << "Current subscriber list: \n";
+
+	for (subscriberListItr = mSubscriberList.begin(); subscriberListItr != mSubscriberList.end();
+			++subscriberListItr)
+	{
+		cout << subscriberListItr->first << ": ";
+		if (subscriberListItr->second.empty())
+		{
+			cout << "NULL\n";
+		}
+		else
+		{
+			for (listItr = subscriberListItr->second.begin(); listItr != subscriberListItr->second.end();
+					++listItr)
+			{
+				cout << *listItr << " ";
+			}
+			cout << "\n";
+		}
+	}
 }
