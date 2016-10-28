@@ -32,8 +32,8 @@ extern po::variables_map gPROG_ARGUMENT;
 
 using namespace std;
 
-const string PASSWORD_CONFIG_FILE = "DATA0";
-const string SUBSCRIBERLIST_CONFIG_FILE = "DATA1";
+const char PASSWORD_CONFIG_FILE[] = "DATA0";
+const char SUBSCRIBERLIST_CONFIG_FILE[] = "DATA1";
 
 const int POWER_STATUS = 0;
 
@@ -57,10 +57,13 @@ public:
 	list<string> getSubscriberList(int aStatusId);
 
 private:
+	/* Save configuration data to file */
     void savePassword();
     void saveSubscriberList();
 
-    void loadData();
+    void loadData(); //load configuration data from file
+
+    void printInternalDataStructure();
 
     GSM *mGSMHdl;
 	PowerHandler *mPowerHdl;

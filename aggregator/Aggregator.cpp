@@ -12,12 +12,8 @@ Aggregator::Aggregator()
 	mGSMHdl = new GSM(this, gPROG_ARGUMENT["serialDevice"].as<string>().c_str(),
 			gPROG_ARGUMENT["baudrate"].as<int>());
 	mPowerHdl = new PowerHandler(this);
-	mAdminPwd = "admin";
-	mSubscriberPwd = "";
 
-	//TODO: check file exist
-	savePassword();
-	saveSubscriberList();
+	loadData();
 }
 
 void Aggregator::start()
@@ -79,6 +75,7 @@ void Aggregator::start()
 Aggregator::~Aggregator()
 {
 	delete mGSMHdl;
+	delete mPowerHdl;
 }
 
 void Aggregator::addSubscriber(int aStatusId, const string& aPhoneNum)
@@ -177,7 +174,7 @@ list<string> Aggregator::getSubscriberList(int aStatusId)
 
 void Aggregator::savePassword()
 {
-	ofstream ofs(PASSWORD_CONFIG_FILE.c_str());
+	ofstream ofs(PASSWORD_CONFIG_FILE);
 	boost::archive::binary_oarchive oa(ofs);
 
 	oa << mAdminPwd;
@@ -186,7 +183,7 @@ void Aggregator::savePassword()
 
 void Aggregator::saveSubscriberList()
 {
-	ofstream ofs(SUBSCRIBERLIST_CONFIG_FILE.c_str());
+	ofstream ofs(SUBSCRIBERLIST_CONFIG_FILE);
 	boost::archive::binary_oarchive oa(ofs);
 
 	oa << mSubscriberList;
@@ -195,17 +192,71 @@ void Aggregator::saveSubscriberList()
 void Aggregator::loadData()
 {
 	/* Load Subscriber List */
-	ifstream ifsSubriberList(SUBSCRIBERLIST_CONFIG_FILE.c_str());
-	boost::archive::binary_iarchive iaSubscriberList(ifsSubriberList);
+	ifstream ifsSubriberList(SUBSCRIBERLIST_CONFIG_FILE);
+	if (ifsSubriberList.good())
+	{
+		cout << "Subscriber list data exist, loading ...\n";
 
-	iaSubscriberList >> mSubscriberList;
+		boost::archive::binary_iarchive iaSubscriberList(ifsSubriberList);
+		iaSubscriberList >> mSubscriberList;
+
+		printInternalDataStructure();
+	}
+	else
+	{
+		cout << "Subscriber list data not found, creating one ...\n";
+		saveSubscriberList();
+	}
 
 	/* Load Password */
-	ifstream ifsPassword(PASSWORD_CONFIG_FILE.c_str());
-	boost::archive::binary_iarchive iaPassword(ifsPassword);
+	ifstream ifsPassword(PASSWORD_CONFIG_FILE);
 
-	iaPassword >> mAdminPwd;
-	iaPassword >> mSubscriberPwd;
+	if (ifsPassword.good())
+	{
+		cout << "Password data exist, loading ...\n";
+
+		boost::archive::binary_iarchive iaPassword(ifsPassword);
+
+		iaPassword >> mAdminPwd;
+		iaPassword >> mSubscriberPwd;
+	}
+	else
+	{
+		cout << "Password data not found, creating one ...\n";
+		mAdminPwd = "admin"; // default
+		mSubscriberPwd = "";
+
+		savePassword();
+	}
 
 	//TODO: Load status
+}
+
+void Aggregator::printInternalDataStructure()
+{
+	boost::lock_guard<boost::mutex> guard(mMtx_SubscriberList);
+
+	map<int, list<string> >::const_iterator subscriberListItr;
+	list<string>::const_iterator listItr;
+
+	cout << "Current subscriber list: \n";
+
+	for (subscriberListItr = mSubscriberList.begin(); subscriberListItr != mSubscriberList.end();
+			++subscriberListItr)
+	{
+		cout << subscriberListItr->first << ": ";
+		if (subscriberListItr->second.empty())
+		{
+			cout << "NULL\n";
+		}
+		else
+		{
+			for (listItr = subscriberListItr->second.begin(); listItr != subscriberListItr->second.end();
+					++listItr)
+			{
+				cout << *listItr << " ";
+			}
+			cout << "\n";
+		}
+	}
 }
