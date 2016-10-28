@@ -73,10 +73,8 @@ private:
 	boost::mutex mMtx_SubscriberList;
 
 	string mAdminPwd;
-	boost::mutex mMtx_AdminPwd;
-
 	string mSubscriberPwd;
-	boost::mutex mMtx_SubscriberPwd;
+	boost::mutex mMtx_Password; // use 1 mutex for 2 passwords to save memory
 };
 
 #endif /* AGGREGATOR_AGGREGATOR_H_ */

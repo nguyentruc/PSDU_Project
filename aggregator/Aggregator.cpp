@@ -103,21 +103,21 @@ void Aggregator::delSubscriber(int aStatusId, const string& aPhoneNum)
 
 bool Aggregator::compareAdminPwd(const string& anAdminPwd)
 {
-	boost::lock_guard<boost::mutex> guard(mMtx_AdminPwd);
+	boost::lock_guard<boost::mutex> guard(mMtx_Password);
 
 	return (anAdminPwd == mAdminPwd);
 }
 
 bool Aggregator::compareSubscriberPwd(const string& aSubscriberPwd)
 {
-	boost::lock_guard<boost::mutex> guard(mMtx_SubscriberPwd);
+	boost::lock_guard<boost::mutex> guard(mMtx_Password);
 
 	return (aSubscriberPwd == mSubscriberPwd);
 }
 
 void Aggregator::setAdminPwd(const string& anAdminPwd)
 {
-	boost::lock_guard<boost::mutex> guard(mMtx_AdminPwd);
+	boost::lock_guard<boost::mutex> guard(mMtx_Password);
 
 	mAdminPwd = anAdminPwd;
 
@@ -126,7 +126,7 @@ void Aggregator::setAdminPwd(const string& anAdminPwd)
 
 void Aggregator::setSubscriberPwd(const string& aSubscriberPwd)
 {
-	boost::lock_guard<boost::mutex> guard(mMtx_SubscriberPwd);
+	boost::lock_guard<boost::mutex> guard(mMtx_Password);
 
 	mSubscriberPwd = aSubscriberPwd;
 
