@@ -75,6 +75,16 @@ void Client::cmdNotPermitted()
 	sendToClient(response);
 }
 
+void Client::cmdNotSupported(const string& aCmd)
+{
+	Json::Value response;
+
+	response["result"] = "FAILED";
+	response["desc"] = string("The command " + aCmd + " is not supported");
+
+	sendToClient(response);
+}
+
 int Client::sessionInitiation(const char* aRcvMsg, int aRcvMsgSize)
 {
 	Json::Value response, root;
@@ -249,6 +259,10 @@ int Client::receivedCmdHandler(const char* aRcvMsg, int aRcvMsgSize)
 	{
 		return subscribeHdl(root);
 	}
+	else if (root["action"] == "Unsubscribe")
+	{
+		return unSubscribeHdl(root);
+	}
 	else if (root["action"] == "Update")
 	{
 		return updateSttHdl(root);
@@ -256,6 +270,7 @@ int Client::receivedCmdHandler(const char* aRcvMsg, int aRcvMsgSize)
 	else
 	{
 		cout << "ERR: Invalid command: " << aRcvMsg << endl;
+		cmdNotSupported(root["action"].asString());
 	}
 
 	return 0;

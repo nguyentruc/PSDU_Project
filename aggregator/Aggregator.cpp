@@ -16,6 +16,7 @@ Aggregator::Aggregator()
 
 	/* Initialize data */
 	loadData();
+	initStatus();
 }
 
 void Aggregator::initStatus()

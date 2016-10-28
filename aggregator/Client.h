@@ -53,6 +53,7 @@ private:
 	int updateSttHdl(Json::Value &aRoot);
 
 	void cmdNotPermitted();
+	void cmdNotSupported(const string& aCmd);
 };
 
 class ClientBLE: public Client
