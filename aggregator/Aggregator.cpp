@@ -143,6 +143,9 @@ void Aggregator::setSubscriberPwd(const string& aSubscriberPwd)
 
 void Aggregator::notifySubscribers(int aStatusId, uint8_t aValue)
 {
+	/* Update status */
+	setStatus(aStatusId, aValue);
+
 	const list<string>& subscriberList = getSubscriberList(aStatusId); //need to double-check thread safe
 	if (subscriberList.empty())
 	{
@@ -150,9 +153,6 @@ void Aggregator::notifySubscribers(int aStatusId, uint8_t aValue)
 	}
 
 	cout << "Notify " << subscriberList.size() << " clients" << endl;
-
-	/* Update status */
-	setStatus(aStatusId, aValue);
 
 	/* Construct JSON */
 	Json::Value root;
