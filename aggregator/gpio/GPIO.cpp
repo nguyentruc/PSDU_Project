@@ -61,7 +61,7 @@ int GPIO::setDirection(uint8_t aWayOut)
 
 int GPIO::getValue()
 {
-	int value = -1;
+	int8_t value = -1;
 
 	if(mIsOut == false)
 	{
@@ -69,6 +69,7 @@ int GPIO::getValue()
 		if(mFd < 0) return mFd;
 
 		read(mFd, &value, 1);
+		value = value - 48;
 
 		mCurValue = value;
 	}

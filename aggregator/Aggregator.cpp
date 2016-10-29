@@ -22,6 +22,7 @@ Aggregator::Aggregator()
 void Aggregator::initStatus()
 {
 	mStatus[POWER_STATUS] = mPowerHdl->getValue();
+	cout << "Current power status is " << (bool)mStatus[POWER_STATUS] << endl;
 }
 
 void Aggregator::start()
@@ -220,17 +221,16 @@ void Aggregator::loadData()
 	ifstream ifsSubriberList(SUBSCRIBERLIST_CONFIG_FILE);
 	if (ifsSubriberList.good())
 	{
-		cout << "Subscriber list data exist, loading ...\n";
-
 		boost::archive::binary_iarchive iaSubscriberList(ifsSubriberList);
 		iaSubscriberList >> mSubscriberList;
 
+		cout << "Subscriber list data exist, loaded\n";
 		printInternalDataStructure();
 	}
 	else
 	{
-		cout << "Subscriber list data not found, creating one ...\n";
 		saveSubscriberList();
+		cout << "Subscriber list data not found, created one\n";
 	}
 
 	/* Load Password */
@@ -238,20 +238,19 @@ void Aggregator::loadData()
 
 	if (ifsPassword.good())
 	{
-		cout << "Password data exist, loading ...\n";
-
 		boost::archive::binary_iarchive iaPassword(ifsPassword);
+		cout << "Password data exist, loaded\n";
 
 		iaPassword >> mAdminPwd;
 		iaPassword >> mSubscriberPwd;
 	}
 	else
 	{
-		cout << "Password data not found, creating one ...\n";
 		mAdminPwd = "admin"; // default
 		mSubscriberPwd = "";
 
 		savePassword();
+		cout << "Password data not found, created one\n";
 	}
 }
 

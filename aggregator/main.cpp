@@ -20,6 +20,8 @@ int main(int argc, char **argv)
 		return 0;
 	}
 
+	cout << "Built time: " << __DATE__ << " " << __TIME__ << endl;
+
 	Aggregator aggregator;
 
 	if (gPROG_ARGUMENT.count("subscribe")) //initial subscription

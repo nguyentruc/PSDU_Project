@@ -1,8 +1,10 @@
 #! /bin/bash
 
 ROOT=/home/trucndt/workspace/PSDU_Project
-TARGET_IP=${2}
-TARGET_USER=${1}
+#TARGET_IP=${2}
+#TARGET_USER=${1}
+TARGET_IP=trucndt-edison.local
+TARGET_USER=root
 ENV_SETUP_PATH=/opt/poky-edison/1.6/environment-setup-core2-32-poky-linux
 
 # Compiling
