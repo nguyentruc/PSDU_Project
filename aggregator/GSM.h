@@ -26,6 +26,8 @@ public:
 
 	void start();
 	int sendSms(const string &aPhoneNum, const string &aMsg);
+	string checkAccMoney();
+	string refillAccMoney(const char* aCode);
 
 private:
 	static const int BUFFER_SIZE = 1024;
@@ -42,8 +44,14 @@ private:
 	boost::mutex mMtx_IsOk;
 	boost::condition_variable mCv_IsOk;
 	bool mIsOk;
+	//TODO: delete this, use mSharedMsg instead
 
-	boost::mutex mMtx_sendSMS; //Only one thread can send SMS at a time
+	boost::mutex mMtx_sendAT; //Only one thread can send AT commands at a time
+
+	/* Share message between threads */
+	boost::mutex mMtx_SharedMsg;
+	boost::condition_variable mCv_SharedMsg;
+	string mSharedMsg;
 
 	void uartTest();
 	void GSMInit();

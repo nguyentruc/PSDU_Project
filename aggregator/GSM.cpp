@@ -96,7 +96,7 @@ void GSM::GSMHandler()
 		{
 		case 0:
 			if (rcvMsg.find("+CMT:") != string::npos) // receive sms header
-			{
+			{//TODO: use ::compare to optimize time
 				state = 1;
 				int firstQuote = rcvMsg.find('\"');
 				int secondQuote = rcvMsg.find('\"', firstQuote + 1);
@@ -113,6 +113,12 @@ void GSM::GSMHandler()
 				boost::unique_lock<boost::mutex> uniLck(mMtx_IsOk);
 				mIsOk = 0;
 				mCv_IsOk.notify_all();
+			}
+			else
+			{
+				boost::unique_lock<boost::mutex> uniLck(mMtx_SharedMsg);
+				mSharedMsg = rcvMsg;
+				mCv_SharedMsg.notify_all();
 			}
 			break;
 		case 1: // get sms body
@@ -318,7 +324,7 @@ int GSM::uartBaudrate(int aBaudrate)
 
 int GSM::sendSms(const string &aPhoneNum, const string &aMsg)
 {
-	boost::lock_guard<boost::mutex> lckGuard(mMtx_sendSMS);
+	boost::lock_guard<boost::mutex> lckGuard(mMtx_sendAT);
     char sendMsg[50];
 
     cout << "Sending SMS message to " << aPhoneNum << endl;
@@ -334,4 +340,74 @@ int GSM::sendSms(const string &aPhoneNum, const string &aMsg)
 	mCv_IsOk.wait(uniLck);
 
 	return mIsOk;
+}
+
+string GSM::checkAccMoney()
+{
+	boost::lock_guard<boost::mutex> lckGuard(mMtx_sendAT);
+	dprintf(mUartFd, "AT+CUSD=1,\"*101#\"\r");
+
+	{
+		/* Wait for OK */
+		boost::unique_lock<boost::mutex> uniLck(mMtx_IsOk);
+		mCv_IsOk.wait(uniLck);
+
+		if (mIsOk == 0) return "";
+	}
+
+	while (true)
+	{
+		/* received cusd message */
+		boost::unique_lock<boost::mutex> uniLck(mMtx_SharedMsg);
+
+		if (mCv_SharedMsg.timed_wait(uniLck, boost::posix_time::milliseconds(20000)))
+		{
+			if (mSharedMsg.compare(0, 5, "+CUSD") == 0) //compare first 5 chars
+			{
+				int firstQuote = mSharedMsg.find('\"');
+				int secondQuote = mSharedMsg.find('\"', firstQuote + 1);
+				return mSharedMsg.substr(firstQuote + 1, secondQuote - firstQuote - 1);
+			}
+		}
+		else
+		{
+			cout << "Potential problems in GSM " << __FILE__ << ":" << __LINE__ << endl;
+			return "";
+		}
+	}
+}
+
+string GSM::refillAccMoney(const char* aCode)
+{
+	boost::lock_guard<boost::mutex> lckGuard(mMtx_sendAT);
+	dprintf(mUartFd, "AT+CUSD=1,\"*100*%s#\"\r", aCode);
+
+	{
+		/* Wait for OK */
+		boost::unique_lock<boost::mutex> uniLck(mMtx_IsOk);
+		mCv_IsOk.wait(uniLck);
+
+		if (mIsOk == 0) return "";
+	}
+
+	while (true)
+	{
+		/* received cusd message */
+		boost::unique_lock<boost::mutex> uniLck(mMtx_SharedMsg);
+
+		if (mCv_SharedMsg.timed_wait(uniLck, boost::posix_time::milliseconds(20000)))
+		{
+			if (mSharedMsg.compare(0, 5, "+CUSD") == 0) //compare first 5 chars
+			{
+				int firstQuote = mSharedMsg.find('\"');
+				int secondQuote = mSharedMsg.find('\"', firstQuote + 1);
+				return mSharedMsg.substr(firstQuote + 1, secondQuote - firstQuote - 1);
+			}
+		}
+		else
+		{
+			cout << "Potential problems in GSM " << __FILE__ << ":" << __LINE__ << endl;
+			return "";
+		}
+	}
 }
