@@ -76,7 +76,7 @@ void Aggregator::start()
 	    cout << "accepted connection from " << buf << endl;
 	    memset(buf, 0, sizeof(buf));
 
-		ClientBLE *clnt = new ClientBLE(this, clntSock);
+		ClientBLE *clnt = new ClientBLE(this, mGSMHdl, clntSock);
 		clnt->start();
 	}
 }

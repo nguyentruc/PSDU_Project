@@ -265,6 +265,16 @@ int Client::receivedCmdHandler(const char* aRcvMsg, int aRcvMsgSize)
 		if (mUser != SUBSCRIBER) cmdNotPermitted();
 		else return unSubscribeHdl(root);
 	}
+	else if (root["action"] == "CheckPhoneAcc")
+	{
+		if (mUser != ADMIN) cmdNotPermitted();
+		else return checkAccHdl(root);
+	}
+	else if (root["action"] == "RefillPhoneAcc")
+	{
+		if (mUser != ADMIN) cmdNotPermitted();
+		else return refillAccHdl(root);
+	}
 	else if (root["action"] == "Update")
 	{
 		return updateSttHdl(root);
@@ -423,10 +433,77 @@ int Client::updateSttHdl(Json::Value& aRoot)
 	return ret;
 }
 
-ClientBLE::ClientBLE(Aggregator* anAggregator, int aSockFd)
+int Client::checkAccHdl(Json::Value& aRoot)
+{
+	Json::Value response;
+	int8_t ret = 0;
+
+	response["result"] = "SUCCESS";
+
+	string retMsg = mGSM->checkAccMoney();
+	if (retMsg.empty())
+	{
+		ret = -1;
+	}
+
+	if (ret < 0)
+	{
+		response["result"] = "FAILED";
+		response["desc"] = "GSM error";
+	}
+	else
+	{
+		response["desc"] = retMsg;
+	}
+
+	sendToClient(response);
+
+	return ret;
+
+}
+
+int Client::refillAccHdl(Json::Value& aRoot)
+{
+	Json::Value response;
+	int8_t ret = 0;
+	string retMsg;
+
+	response["result"] = "SUCCESS";
+
+	if (aRoot.isMember("code") == false)
+	{
+		ret = -1;
+	}
+	else
+	{
+		retMsg = mGSM->refillAccMoney(aRoot["code"].asCString());
+		if (retMsg.empty())
+		{
+			ret = -2;
+		}
+	}
+
+	if (ret < 0)
+	{
+		response["result"] = "FAILED";
+		if (ret == -1) response["desc"] = "Parameter missing";
+		else response["desc"] = "GSM error";
+	}
+	else
+	{
+		response["desc"] = retMsg;
+	}
+
+	sendToClient(response);
+
+	return ret;
+}
+
+ClientBLE::ClientBLE(Aggregator* anAggregator, GSM *aGSM, int aSockFd)
 {
 	mAggregator = anAggregator;
 	mSockFd = aSockFd;
+	mGSM = aGSM;
 }
 
 ClientBLE::~ClientBLE()

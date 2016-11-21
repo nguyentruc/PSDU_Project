@@ -26,6 +26,7 @@ public:
 
 protected:
 	Aggregator *mAggregator;
+	GSM *mGSM;
 
 	int sessionInitiation(const char* aRcvMsg, int aRcvMsgSize);
 
@@ -47,6 +48,8 @@ private:
 	int delSubscriberHdl(Json::Value &aRoot);
 	int getSubscriberListHdl(Json::Value &aRoot);
 	int changeAccPwdHdl(Json::Value &aRoot);
+	int checkAccHdl(Json::Value &aRoot);
+	int refillAccHdl(Json::Value &aRoot);
 
 	int subscribeHdl(Json::Value &aRoot);
 	int unSubscribeHdl(Json::Value &aRoot);
@@ -59,7 +62,7 @@ private:
 class ClientBLE: public Client
 {
 public:
-	ClientBLE(Aggregator *anAggregator, int aSockFd);
+	ClientBLE(Aggregator *anAggregator, GSM *aGSM, int aSockFd);
 	~ClientBLE();
 
 private:
@@ -80,7 +83,6 @@ public:
 private:
 	string mMessage;
 	string mPhoneNum;
-	GSM *mGSM;
 
 	void clientHandler();
 	int sendToClient(const Json::Value& aRoot);

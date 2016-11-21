@@ -381,6 +381,7 @@ string GSM::refillAccMoney(const char* aCode)
 {
 	boost::lock_guard<boost::mutex> lckGuard(mMtx_sendAT);
 	dprintf(mUartFd, "AT+CUSD=1,\"*100*%s#\"\r", aCode);
+	printf("\nAT+CUSD=1,\"*100*%s#\"\r\n", aCode);
 
 	{
 		/* Wait for OK */
