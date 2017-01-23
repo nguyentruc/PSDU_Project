@@ -5,7 +5,7 @@ ROOT=/home/trucndt/workspace/PSDU_Project
 #TARGET_USER=${1}
 TARGET_IP=trucndt-edison.local
 TARGET_USER=root
-ENV_SETUP_PATH=/opt/poky-edison/1.6/environment-setup-core2-32-poky-linux
+ENV_SETUP_PATH=/opt/poky-edison/1.7.3/environment-setup-core2-32-poky-linux
 
 # Compiling
 echo
